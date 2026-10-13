@@ -1,0 +1,10 @@
+services:
+  backend:
+    volumes:
+      - ${SIMULATION_COURSES_PATH:?Simulation courses path is required}:/courses:ro
+
+  container_manager:
+    volumes:
+      - ${SIMULATION_COURSES_PATH:?Simulation courses path is required}:/courses:ro
+    environment:
+      PLATFORM_INSTANCE: ${SIMULATION_PLATFORM_INSTANCE:?Simulation instance is required}

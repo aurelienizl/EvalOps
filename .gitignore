@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+*.db-wal
+*.db-shm
+.env
+.pytest_cache/
+.coverage
+htmlcov/
+tests/frontend/node_modules/
+tests/frontend/test-results/
+tests/frontend/playwright-report/
+*.log
+.venv/
+courses/*
+!courses/examples/

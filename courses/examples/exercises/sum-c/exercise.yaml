@@ -1,0 +1,9 @@
+id: sum-c
+name: Sum Two Integers in C
+difficulty: easy
+points: 3
+order: 3
+workspace_dir: sum-c
+grade_timeout_seconds: 60
+max_evaluations: 3
+evaluation_window_minutes: 60

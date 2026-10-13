@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.pytest_cache
+.venv
+**/node_modules
+__pycache__
+*.pyc
+*.db
+*.db-wal
+*.db-shm
+README.md
+tests

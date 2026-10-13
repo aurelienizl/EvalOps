@@ -34,9 +34,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/ready"]
-      interval: 10s
+      interval: 30s
       timeout: 3s
-      retries: 5
+      retries: 10
     restart: unless-stopped
 
   container_manager:
@@ -61,9 +61,9 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/v1/health"]
       start_period: ${CONTAINER_MANAGER_START_PERIOD:-30m}
-      interval: 10s
+      interval: 30s
       timeout: 3s
-      retries: 5
+      retries: 10
     restart: unless-stopped
 
 networks:

@@ -13,9 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class BuildManager:
-    def __init__(self, docker_client: docker.DockerClient, instance_id: str):
+    def __init__(self, docker_client: docker.DockerClient, instance_id: str, apt_cache_url: str = ""):
         self.client = docker_client
         self.instance_id = instance_id
+        self.apt_cache_url = apt_cache_url
         self.report: Dict[str, Dict[str, Any]] = {}
         self.is_ready = False
         self.phase = "preparing"
@@ -24,6 +25,11 @@ class BuildManager:
         self.phase = "preparing"
         self.is_ready = False
         self.report.clear()
+
+        buildargs: Dict[str, str] = {}
+        if self.apt_cache_url:
+            buildargs["http_proxy"] = self.apt_cache_url
+            buildargs["HTTP_PROXY"] = self.apt_cache_url
 
         exercises = list(catalog.exercises_by_id.values())
         logger.info(f"Starting sequential builds for {len(exercises)} exercises...")
@@ -45,12 +51,15 @@ class BuildManager:
             try:
                 for kind, tag in tags:
                     logger.info(f"Building {kind} image for exercise {ex.id}...")
-                    image, _ = self.client.images.build(
-                        path=str(getattr(ex, f"{kind}_context_path")),
-                        dockerfile="Dockerfile",
-                        tag=tag,
-                        rm=True,
-                    )
+                    build_kwargs: Dict[str, Any] = {
+                        "path": str(getattr(ex, f"{kind}_context_path")),
+                        "dockerfile": "Dockerfile",
+                        "tag": tag,
+                        "rm": True,
+                    }
+                    if buildargs:
+                        build_kwargs["buildargs"] = buildargs
+                    image, _ = self.client.images.build(**build_kwargs)
                     ex_report[f"{kind}_image_id"] = image.id
                     ex_report[f"{kind}_tag"] = tag
 

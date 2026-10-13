@@ -15,6 +15,7 @@ from shared.catalog import parse_and_validate_catalog
 from .api.v1 import api_v1_router
 from .builds import BuildManager
 from .core.config import (
+    APT_CACHE_URL,
     COURSES_PATH,
     PLATFORM_INSTANCE,
     SSH_BIND_ADDRESS,
@@ -50,7 +51,7 @@ async def lifespan(app: FastAPI):
             ssh_port_min=SSH_PORT_MIN,
             ssh_port_max=SSH_PORT_MAX,
         )
-        builder = BuildManager(client, state.get_instance_id())
+        builder = BuildManager(client, state.get_instance_id(), APT_CACHE_URL)
         state.set_catalog(catalog)
         state.set_docker_runtime(runtime)
         state.set_build_manager(builder)

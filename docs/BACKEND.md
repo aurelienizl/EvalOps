@@ -2,7 +2,7 @@
 
 The **Backend** (`backend`) is the core business application of the EvalOps platform. It manages user accounts, authenticates sessions via secure cookies, enforces role-based access control (students and administrators), parses the course catalog, handles SQLite persistence with WAL mode, serializes mutating operations via per-student locks, enforces evaluation quotas, and orchestrates calls to the Container Manager via a dedicated service client.
 
-> **Network Position**: The Backend is exposed to the `frontend` Nginx reverse proxy on the `frontend_backend` network (port `8000`) and communicates with the `container_manager` on the internal `backend_manager` network (port `8001`).
+> **Network Position**: The Backend is accessible on the `frontend_backend` network (port `8000`) and communicates with the `container_manager` on the internal `backend_manager` network (port `8001`).
 
 ---
 

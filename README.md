@@ -14,9 +14,9 @@ L'infrastructure s'articule autour de trois services permanents orchestrés via 
                     ┌─────────────────────────┐
                     │      Client / WAF       │
                     └────────────┬────────────┘
-                                 │ HTTP :80
+                                 │ HTTP :8080
                     ┌────────────▼────────────┐
-                    │        frontend         │  (Nginx, UI AMOLED, Proxy /api/)
+                    │        frontend         │  (Nginx, UI AMOLED)
                     └────────────┬────────────┘
                                  │ Réseau frontend_backend
                     ┌────────────▼────────────┐
@@ -46,7 +46,7 @@ L'infrastructure s'articule autour de trois services permanents orchestrés via 
 
 | Service | Technologies | Rôle |
 |---|---|---|
-| **`frontend`** | Nginx Alpine, HTML5, CSS3 AMOLED, ES Modules natifs | Interface utilisateur industrielle haute densité, affichage temps réel du statut, console d'administration complète et proxy inverse sécurisé vers le backend. |
+| **`frontend`** | Nginx Alpine, HTML5, CSS3 AMOLED, ES Modules natifs | Interface utilisateur industrielle haute densité, affichage temps réel du statut et console d'administration complète. |
 | **`backend`** | Python 3.11+, FastAPI, SQLite (mode WAL), Argon2id | Architecture modulaire par routeurs (`api/v1/`), authentification par cookies sécurisés, contrôle d'accès par rôles (`student` / `admin`), API d'administration générique, catalogue des cours et client dédié au Container Manager. |
 | **`container_manager`** | Python 3.11+, FastAPI, Docker SDK Python | Architecture modulaire par domaine (`api/v1/`), orchestration des conteneurs étudiants, allocation dynamique des ports SSH, injection des clés SSH dans les volumes et exécution hermétique des évaluateurs. |
 
@@ -95,7 +95,7 @@ EvalOps/
 │
 ├── frontend/                   # Service Nginx & Assets Web
 │   ├── Dockerfile
-│   ├── nginx.conf              # Configuration Nginx (reverse-proxy /api/, headers de sécurité)
+│   ├── nginx.conf              # Configuration Nginx (fichiers statiques, headers de sécurité)
 │   └── public/
 │       ├── index.html          # Shell SPA, modales, shell admin et templates SVG
 │       ├── styles.css          # Thème CSS Industriel AMOLED & styles console admin
@@ -231,7 +231,7 @@ resources:
 ### 6.1 Prérequis
 - Système d'exploitation Linux (Ubuntu 22.04+, Debian 12+, RHEL 9+)
 - Docker Engine 24.0+ et Docker Compose v2
-- Port `80` libre (ou mappé derrière votre proxy inverse de terminaison TLS)
+- Port `8080` libre (ou mappé derrière votre proxy inverse de terminaison TLS)
 - Plage de ports `22000-22999` ouverte sur le pare-feu hôte pour les connexions SSH
 
 ### 6.2 Configuration
@@ -255,7 +255,7 @@ Au démarrage :
 1. Le service `container_manager` inspecte Docker et purge d'éventuels conteneurs résiduels d'une session précédente.
 2. Le catalogue `./courses` est validé et les images Docker de développement et d'évaluation sont construites séquentiellement pendant l'initialisation. Le manager accepte les requêtes une fois les constructions terminées.
 3. Une fois le manager sain, le `backend` initialise le schéma SQLite `/data/app.db` et démarre son API.
-4. Une fois le backend prêt, le `frontend` Nginx démarre et sert l'interface sur `http://localhost/`.
+4. Le `frontend` Nginx sert l'interface sur `http://localhost:8080/`.
 
 Vérifiez l'état de santé des services :
 ```bash

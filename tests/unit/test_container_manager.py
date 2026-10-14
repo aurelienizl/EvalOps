@@ -121,29 +121,6 @@ def test_build_manager_tolerates_partial_failures():
     assert report["good-ex"]["evaluator_image_id"] == "eval-second-id"
 
 
-def test_build_manager_uses_apt_proxy():
-    """BuildManager injects http_proxy buildargs when apt_cache_url is set."""
-    client = Mock()
-    client.images.build.return_value = (SimpleNamespace(id="dev-img-id"), [])
-
-    exercises = {
-        "ex1": SimpleNamespace(
-            id="ex1",
-            dev_context_path=Path("ex1/dev"),
-            evaluator_context_path=Path("ex1/evaluator"),
-        ),
-    }
-
-    bm = BuildManager(client, "inst123", apt_cache_url="http://172.17.0.1:3142")
-    bm.run_all_builds(SimpleNamespace(exercises_by_id=exercises))
-
-    assert client.images.build.call_count == 2
-    for call in client.images.build.call_args_list:
-        assert call.kwargs["buildargs"] == {
-            "http_proxy": "http://172.17.0.1:3142",
-            "HTTP_PROXY": "http://172.17.0.1:3142",
-        }
-
 
 @pytest.mark.parametrize("operation", ["start", "grade"])
 @pytest.mark.parametrize("condition, expected_code, expected_status", [

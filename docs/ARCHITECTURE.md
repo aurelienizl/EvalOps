@@ -4,7 +4,7 @@ EvalOps uses three services and synchronous HTTP requests. Each service has one 
 
 | Service | Owns | Calls |
 | --- | --- | --- |
-| Frontend | Static HTML/JS, session display, reverse proxy | Backend `/api/v1` |
+| Frontend | Static HTML/JS, session display | Backend `/api/v1` |
 | Backend | Authentication, authorization, catalog, scores and operation records in SQLite | Container manager `/v1` |
 | Container manager | Docker images, containers, SSH ports, workspaces and snapshots | Docker Engine |
 
@@ -18,7 +18,7 @@ Each service stores its process-local objects in one state module. The applicati
 2. It builds exercise images sequentially in the startup lifecycle. There is no background build thread; HTTP requests are accepted after the build pass finishes.
 3. Manager health succeeds only after startup completes. Individual failed builds stay unavailable and are included in the build report; successful exercises can still be used.
 4. Compose starts the backend after manager health succeeds. Backend readiness verifies that both services use the same catalog fingerprint.
-5. Compose starts Nginx after backend readiness succeeds. Nginx resolves the backend service address again when Docker recreates it.
+5. Compose starts Nginx to serve frontend assets.
 
 `CONTAINER_MANAGER_START_PERIOD` defaults to `30m`. It allows time for cold builds before Docker counts failing health checks. Successful health checks allow startup immediately; this is not a fixed delay. Increase it for a large catalog or a slow image registry.
 

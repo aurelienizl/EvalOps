@@ -1,8 +1,6 @@
 id: hello-c
 name: First C Program
 difficulty: warmup
-points: 2
-order: 1
 workspace_dir: hello-c
 grade_timeout_seconds: 60
 max_evaluations: 3

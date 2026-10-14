@@ -40,7 +40,7 @@ def test_completion_is_permanent(tmp_db):
         assert exercise_id not in get_completed_exercise_ids(conn, student_id)
 
         # First attempt: create evaluation and mark 100% completed
-        create_initial_evaluation(conn, eval_id, student_id, exercise_id, "Hello Shell", 100)
+        create_initial_evaluation(conn, eval_id, student_id, exercise_id, "Hello Shell")
         mark_exercise_completed(conn, student_id, exercise_id, eval_id)
         assert exercise_id in get_completed_exercise_ids(conn, student_id)
 
@@ -58,7 +58,7 @@ def test_finalize_evaluation_persists_score_and_tests(tmp_db):
     ]
 
     with connect_db(tmp_db) as conn:
-        create_initial_evaluation(conn, eval_id, student_id, "hello-shell", "Hello Shell", 100)
+        create_initial_evaluation(conn, eval_id, student_id, "hello-shell", "Hello Shell")
         finalize_evaluation(
             conn=conn,
             evaluation_id=eval_id,

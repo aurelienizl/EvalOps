@@ -31,7 +31,7 @@ export async function loadExerciseView(exerciseId) {
   showMessage(readme, "Loading specifications...");
   showMessage(resources, "Loading attachments...", "text-muted mono empty-message");
   showMessage($("exercise-history-list"), "Loading audit logs...", "text-muted mono empty-message");
-  for (const id of ["exercise-title", "exercise-diff-tag", "exercise-points-tag", "exercise-status-tag"]) {
+  for (const id of ["exercise-title", "exercise-diff-tag", "exercise-status-tag"]) {
     if ($(id)) $(id).textContent = "";
   }
   $("exercise-quota-tag")?.classList.add("hidden");
@@ -50,7 +50,6 @@ export async function loadExerciseView(exerciseId) {
     const difficulty = $("exercise-diff-tag");
     difficulty.className = `tag tag-${exercise.difficulty}`;
     difficulty.textContent = String(exercise.difficulty).toUpperCase();
-    $("exercise-points-tag").textContent = `${exercise.points} PTS`;
     const status = $("exercise-status-tag");
     status.textContent = exercise.available !== true ? "UNAVAILABLE" : exercise.is_expired ? "DEADLINE EXPIRED" : exercise.completed ? "PASSED ✓" : "NOT PASSED";
     status.className = exercise.completed ? "tag tag-status" : "tag";

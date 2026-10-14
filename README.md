@@ -210,7 +210,6 @@ Chaque exercice est placé dans un sous-dossier de `./courses/<cours>/exercises/
 id: sys-config
 name: "Configuration serveur Nginx"
 difficulty: easy     # warmup, easy, medium, hard
-points: 100
 timeout: 30          # Durée max de l'évaluateur en secondes
 
 resources:

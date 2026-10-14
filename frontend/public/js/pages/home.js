@@ -6,12 +6,12 @@ function courseCard(course) {
   card.href = `#courses/${encodeURIComponent(course.id)}`;
   field("id").textContent = `MODULE // ${course.id.toUpperCase()}`;
   field("name").textContent = course.name;
-  field("status").className = `tag ${course.completed ? "tag-status" : "tag-points"}`;
+  field("status").className = `tag ${course.completed ? "tag-status" : "tag-neutral"}`;
   field("status").textContent = course.available === false ? "UNAVAILABLE" : course.completed ? "COMPLETED ✓" : `${course.progress.completed}/${course.progress.total} PASSED`;
   field("deadline").textContent = `DEADLINE // ${formatDate(course.deadline)}`;
   const percent = course.progress.total > 0 ? Math.round(course.progress.completed / course.progress.total * 100) : 0;
   field("progress").style.width = `${percent}%`;
-  field("score").textContent = `${course.score.earned} / ${course.score.maximum} PTS`;
+  field("score").textContent = `${course.progress.completed} / ${course.progress.total}`;
   return card;
 }
 

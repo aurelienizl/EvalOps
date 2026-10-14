@@ -186,17 +186,16 @@ def create_initial_evaluation(
     student_id: str,
     exercise_id: str,
     exercise_name: str,
-    exercise_points: int,
 ) -> None:
     now = datetime.now(timezone.utc).isoformat()
     conn.execute(
         """
         INSERT INTO evaluations (
-            id, student_id, exercise_id, exercise_name, exercise_points,
+            id, student_id, exercise_id, exercise_name,
             status, created_at
-        ) VALUES (?, ?, ?, ?, ?, 'running', ?)
+        ) VALUES (?, ?, ?, ?, 'running', ?)
         """,
-        (evaluation_id, student_id, exercise_id, exercise_name, exercise_points, now),
+        (evaluation_id, student_id, exercise_id, exercise_name, now),
     )
 
 
@@ -376,7 +375,7 @@ def list_all_evaluations(
     total = count_row["total"] if count_row else 0
 
     query = f"""
-        SELECT id, student_id, exercise_id, exercise_name, exercise_points, status,
+        SELECT id, student_id, exercise_id, exercise_name, status,
                created_at, finished_at, passed, total, percentage, tests_json, error_code, error_message
         FROM evaluations {where_sql}
         ORDER BY created_at DESC LIMIT ? OFFSET ?

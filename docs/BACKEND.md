@@ -133,7 +133,7 @@ All endpoints return JSON responses. Errors follow the standard format: `{"error
 |---|---|---|
 | `GET` | `/api/v1/courses` | Lists all published courses with student progress statistics. |
 | `GET` | `/api/v1/courses/{course_id}` | Returns course details, deadline, and contained exercises. |
-| `GET` | `/api/v1/exercises/{exercise_id}` | Returns exercise details, difficulty, points, completion status, and remaining quota. |
+| `GET` | `/api/v1/exercises/{exercise_id}` | Returns exercise details, difficulty, completion status, and remaining quota. |
 | `GET` | `/api/v1/exercises/{exercise_id}/resources/{resource_id}` | Downloads course resource file. |
 
 ---

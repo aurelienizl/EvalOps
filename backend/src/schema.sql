@@ -35,7 +35,6 @@ CREATE TABLE IF NOT EXISTS evaluations (
     student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     exercise_id TEXT NOT NULL,
     exercise_name TEXT,
-    exercise_points INTEGER,
     status TEXT NOT NULL,
     created_at TEXT NOT NULL,
     finished_at TEXT,

@@ -390,7 +390,7 @@ async function loadEnvironmentsTab() {
         </td>
         <td><span class="tag tag-status">${escapeHtml(r.operation_type.toUpperCase())}</span></td>
         <td class="mono text-main">${escapeHtml(r.exercise_id || "N/A")}</td>
-        <td><span class="tag tag-points">${escapeHtml(r.phase.toUpperCase())}</span></td>
+        <td><span class="tag tag-neutral">${escapeHtml(r.phase.toUpperCase())}</span></td>
         <td class="mono text-muted">${escapeHtml(formatDate(r.started_at))}</td>
         <td class="text-right">
           <button class="btn btn-danger btn-sm btn-unlock-row">
@@ -467,7 +467,7 @@ async function loadEvaluationsTab() {
       const tr = document.createElement("tr");
       const isCompleted = ev.status === "completed";
       const isPassed = ev.percentage === 100.0;
-      const statusClass = ["error", "interrupted"].includes(ev.status) ? "tag-hard" : isPassed ? "tag-status" : "tag-points";
+      const statusClass = ["error", "interrupted"].includes(ev.status) ? "tag-hard" : isPassed ? "tag-status" : "tag-neutral";
 
       tr.innerHTML = `
         <td><code class="mono text-muted">${escapeHtml(ev.id.slice(0, 8))}...</code></td>

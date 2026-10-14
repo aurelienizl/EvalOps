@@ -44,14 +44,6 @@ class Exercise:
         return self.manifest.difficulty
 
     @property
-    def points(self) -> int:
-        return self.manifest.points
-
-    @property
-    def order(self) -> int:
-        return self.manifest.order
-
-    @property
     def workspace_dir(self) -> str:
         return self.manifest.workspace_dir
 
@@ -121,7 +113,7 @@ class Course:
     ):
         self.manifest = manifest
         self.course_dir = course_dir
-        self.exercises = sorted(exercises, key=lambda e: (e.order, e.id))
+        self.exercises = list(exercises)
         self.deadline_utc = deadline_utc
 
     @property
@@ -135,10 +127,6 @@ class Course:
     @property
     def deadline_iso(self) -> str:
         return self.manifest.deadline
-
-    @property
-    def order(self) -> int:
-        return self.manifest.order
 
     def is_expired(self, current_time: Optional[datetime] = None) -> bool:
         now = current_time or datetime.now(timezone.utc)
@@ -159,7 +147,7 @@ class Catalog:
         return self.exercises_by_id.get(exercise_id)
 
     def list_courses(self) -> List[Course]:
-        return sorted(self.courses.values(), key=lambda c: (c.order, c.id))
+        return list(self.courses.values())
 
 
 def _hash_file(hasher, file_path: Path, catalog_root: Path) -> None:
@@ -183,7 +171,7 @@ def parse_and_validate_catalog(courses_path: Path | str) -> Catalog:
     exercise_ids: set[str] = set()
     workspace_dirs: set[str] = set()
 
-    course_dirs = sorted([d for d in path.iterdir() if d.is_dir()], key=lambda d: d.name)
+    course_dirs = [d for d in path.iterdir() if d.is_dir()]
 
     for cdir in course_dirs:
         course_yaml_path = cdir / "course.yaml"
@@ -227,7 +215,7 @@ def parse_and_validate_catalog(courses_path: Path | str) -> Catalog:
         exercises_for_course: List[Exercise] = []
 
         if exercises_dir.is_dir():
-            ex_dirs = sorted([d for d in exercises_dir.iterdir() if d.is_dir()], key=lambda d: d.name)
+            ex_dirs = [d for d in exercises_dir.iterdir() if d.is_dir()]
             for exdir in ex_dirs:
                 ex_yaml_path = exdir / "exercise.yaml"
                 if not ex_yaml_path.is_file():

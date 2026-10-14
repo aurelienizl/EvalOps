@@ -113,7 +113,6 @@ def test_admin_evaluations_and_platform_stats(auth_admin, tmp_db):
             student_id="student-a-id",
             exercise_id="hello-c",
             exercise_name="Hello C",
-            exercise_points=10,
         )
         finalize_evaluation(
             conn,

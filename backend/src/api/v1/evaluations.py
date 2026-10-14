@@ -25,7 +25,6 @@ def format_evaluation_response(row: sqlite3.Row) -> Dict[str, Any]:
         "student_id": row["student_id"],
         "exercise_id": row["exercise_id"],
         "exercise_name": row["exercise_name"],
-        "exercise_points": row["exercise_points"],
         "status": row["status"],
         "created_at": row["created_at"],
         "finished_at": row["finished_at"],

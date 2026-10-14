@@ -1,8 +1,6 @@
 id: fibo-c
 name: Fibonacci in C
 difficulty: easy
-points: 3
-order: 2
 workspace_dir: fibo-c
 grade_timeout_seconds: 60
 max_evaluations: 3

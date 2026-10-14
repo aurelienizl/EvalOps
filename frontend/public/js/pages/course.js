@@ -12,7 +12,6 @@ function exerciseTile(exercise) {
   tile.href = `#exercises/${encodeURIComponent(exercise.id)}`;
   field("id").textContent = exercise.id.toUpperCase();
   field("name").textContent = exercise.name;
-  field("points").textContent = `${exercise.points} PTS`;
   field("status").className = `status-badge-${exercise.completed ? "completed" : "pending"}`;
   field("status").textContent = exercise.available === false ? "UNAVAILABLE" : exercise.completed ? "PASSED ✓" : "PENDING";
   return tile;

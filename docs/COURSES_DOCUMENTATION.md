@@ -92,7 +92,6 @@ courses/
 id: linux
 name: Bases Linux & Administration Système
 deadline: "2026-12-31T23:59:59+01:00"
-order: 1
 ```
 
 ### Spécification des champs
@@ -102,7 +101,6 @@ order: 1
 | `id` | Chaîne | **Oui** | Identifiant unique du cours. Lettres minuscules, chiffres, tirets `-` et underscores `_` uniquement (`^[a-z0-9][a-z0-9_-]{0,63}$`). |
 | `name` | Chaîne | **Oui** | Nom complet et lisible affiché aux étudiants. |
 | `deadline` | Chaîne ISO 8601 | **Oui** | Date et heure limite de rendu. **Le décalage horaire (+01:00, +02:00 ou Z) est obligatoire.** |
-| `order` | Entier | **Oui** | Ordre d'affichage du cours dans le catalogue (1, 2, 3...). |
 
 > [!IMPORTANT]
 > L'identifiant `id` doit être unique sur l'ensemble de la plateforme EvalOps.
@@ -115,14 +113,12 @@ Chaque exercice possède son sous-dossier dans `exercises/<nom-exercice>/`.
 
 ### 4.1. Le manifeste `exercise.yaml`
 
-Ce fichier configure les points, la difficulté, les quotas et l'espace de travail de l'exercice.
+Ce fichier configure la difficulté, les quotas et l'espace de travail de l'exercice.
 
 ```yaml
 id: hello-shell
 name: Premier script shell
 difficulty: warmup
-points: 2
-order: 1
 workspace_dir: hello-shell
 grade_timeout_seconds: 60
 max_evaluations: 3
@@ -141,8 +137,6 @@ resources:
 | `id` | Chaîne | - | **Obligatoire.** Identifiant unique de l'exercice (format: `^[a-z0-9][a-z0-9_-]{0,63}$`). |
 | `name` | Chaîne | - | **Obligatoire.** Titre de l'exercice affiché dans l'interface. |
 | `difficulty` | Chaîne | - | **Obligatoire.** Valeurs autorisées : `warmup`, `easy`, `medium`, `hard`. |
-| `points` | Entier | - | **Obligatoire.** Nombre de points accordés (entier strictement positif `> 0`). |
-| `order` | Entier | - | **Obligatoire.** Ordre d'affichage dans la liste des exercices du module. |
 | `workspace_dir` | Chaîne | - | **Obligatoire.** Nom du dossier créé dans `/home/student/<workspace_dir>`. Doit être unique sur toute la plateforme. |
 | `grade_timeout_seconds` | Entier | `120` | Durée maximale allouée au conteneur de correction (1 à 300 secondes). |
 | `max_evaluations` | Entier | `3` | Nombre maximum de soumissions autorisées dans la fenêtre de temps. |
@@ -502,8 +496,6 @@ courses/python/exercises/word-count/
 id: word-count
 name: Analyseur de Texte Python
 difficulty: easy
-points: 3
-order: 1
 workspace_dir: word-count
 grade_timeout_seconds: 30
 max_evaluations: 5

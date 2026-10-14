@@ -450,7 +450,6 @@ class RuntimeManager:
                     student_id,
                     exercise_id,
                     exercise.name,
-                    exercise.points,
                 )
             try:
                 data = self.container_client.grade_student_environment(

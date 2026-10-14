@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Annotated, Any, List, Literal, Optional
 
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 Identifier = Annotated[str, Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$")]
 
@@ -24,11 +24,11 @@ class ResourceItem(BaseModel):
 
 
 class ExerciseManifest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     id: str
     name: str
     difficulty: Difficulty
-    points: int = Field(gt=0)
-    order: int
     workspace_dir: str
     grade_timeout_seconds: int = Field(default=120, le=300, gt=0)
     max_evaluations: int = Field(default=3, gt=0)
@@ -37,10 +37,11 @@ class ExerciseManifest(BaseModel):
 
 
 class CourseManifest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     id: str
     name: str
     deadline: str  # ISO 8601 with timezone
-    order: int
 
 
 class EvaluatorTestResult(BaseModel):

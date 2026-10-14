@@ -29,7 +29,6 @@ def runtime(tmp_db):
     exercise = SimpleNamespace(
         id=EXERCISE,
         name="Example",
-        points=5,
         course_id="course",
         max_evaluations=3,
         evaluation_window_minutes=60,
@@ -69,7 +68,7 @@ def seed_pending(operation_type="grade"):
             conn, STUDENT, "pending", operation_type, EXERCISE, "grading"
         )
         if operation_type == "grade":
-            create_initial_evaluation(conn, "pending", STUDENT, EXERCISE, "Example", 5)
+            create_initial_evaluation(conn, "pending", STUDENT, EXERCISE, "Example")
 
 
 def grade_result(operation_id="pending", **overrides):

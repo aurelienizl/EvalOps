@@ -42,8 +42,6 @@ def get_courses(auth_data: Tuple[Dict[str, Any], Dict[str, Any]] = Depends(get_c
     for c in catalog.list_courses():
         total_exercises = len(c.exercises)
         completed_count = sum(1 for ex in c.exercises if ex.id in completed_ex_ids)
-        earned_points = sum(ex.points for ex in c.exercises if ex.id in completed_ex_ids)
-        max_points = sum(ex.points for ex in c.exercises)
 
         is_available = any(build_report.get(ex.id, {}).get("available", False) for ex in c.exercises)
 
@@ -54,10 +52,6 @@ def get_courses(auth_data: Tuple[Dict[str, Any], Dict[str, Any]] = Depends(get_c
             "progress": {
                 "completed": completed_count,
                 "total": total_exercises,
-            },
-            "score": {
-                "earned": earned_points,
-                "maximum": max_points,
             },
             "completed": (completed_count == total_exercises and total_exercises > 0),
             "available": is_available,
@@ -103,8 +97,6 @@ def get_course_detail(
             "id": ex.id,
             "name": ex.name,
             "difficulty": ex.difficulty.value,
-            "points": ex.points,
-            "order": ex.order,
             "completed": is_completed,
             "available": is_avail,
         })
@@ -155,7 +147,6 @@ def get_exercise_detail(
         "course_name": course.name if course else "",
         "course_deadline": course.deadline_iso if course else "",
         "difficulty": ex.difficulty.value,
-        "points": ex.points,
         "completed": ex.id in completed_ex_ids,
         "available": build_report.get(ex.id, {}).get("available", False),
         "is_expired": bool(course and course.is_expired()),

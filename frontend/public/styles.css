@@ -542,7 +542,7 @@ button:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
   border: 1px solid var(--border-light);
   color: var(--text-muted);
 }
-.tag-points          { background: var(--bg-surface-elevated); border-color: var(--border-light);      color: var(--text-white); }
+.tag-neutral         { background: var(--bg-surface-elevated); border-color: var(--border-light);      color: var(--text-white); }
 .tag-status          { background: var(--success-bg);          border-color: var(--success-border);    color: var(--success-fg); }
 .tag-warmup          { border-color: #0369a1; color: #38bdf8; }
 .tag-easy            { border-color: #15803d; color: #4ade80; }

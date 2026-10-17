@@ -1,552 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EvalOps — DevOps Assessment Platform</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-</head>
-
-<body>
-  <svg class="hidden" aria-hidden="true">
-    <defs>
-      <symbol id="icon-terminal" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></symbol>
-      <symbol id="icon-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></symbol>
-      <symbol id="icon-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="1" ry="1"></rect><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v1"></path></symbol>
-      <symbol id="icon-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12"></rect></symbol>
-      <symbol id="icon-play" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></symbol>
-      <symbol id="icon-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></symbol>
-      <symbol id="icon-file" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></symbol>
-      <symbol id="icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></symbol>
-    </defs>
-  </svg>
-  <div id="app">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="EvalOps — practical DevOps courses, development environments and assessments."
+    />
+    <title>EvalOps — Workspace Console</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23070709'/%3E%3Cpath d='m7 9 7 7-7 7m10 0h8' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/vendor/purify.js"></script>
+    <script type="module" src="/js/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <header class="app-header">
-      <div class="header-brand">
-        <a href="#courses" class="brand-link">
-          <div class="brand-icon-wrapper">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><use href="#icon-terminal"></use></svg>
-          </div>
-          <span class="brand-title">EVALOPS</span>
-          <span class="brand-badge">RUNTIME</span>
-        </a>
-      </div>
-      <nav id="app-nav" class="header-nav hidden">
-        <a href="#courses" class="nav-link" id="nav-courses">Courses</a>
-        <a href="#profile" class="nav-link" id="nav-profile">Profile</a>
-        <a href="#admin" class="nav-link hidden" id="nav-admin">Admin</a>
+      <a class="brand-link" href="#courses" aria-label="EvalOps courses">
+        <span class="brand-icon" aria-hidden="true">&gt;_</span>
+        <span class="brand-title">EVALOPS</span
+        ><span class="brand-badge">RUNTIME</span>
+      </a>
+      <nav id="app-nav" aria-label="Main navigation" hidden>
+        <a class="nav-link" href="#courses" data-nav="courses">Courses</a>
+        <a class="nav-link" href="#profile" data-nav="profile">Profile</a>
+        <a class="nav-link" href="#admin" data-nav="admin" id="nav-admin" hidden
+          >Admin</a
+        >
         <div class="user-badge">
-          <span class="user-status-dot"></span>
-          <span id="user-role-badge" class="tag tag-role hidden">ADMIN</span>
-          <span id="user-email-display"></span>
-          <button id="btn-logout" class="btn btn-ghost" title="Sign Out" aria-label="Sign Out">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="#icon-logout"></use></svg>
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="user-role" class="tag" hidden>ADMIN</span
+          ><span id="user-email"></span>
+          <button
+            id="logout"
+            class="btn btn-ghost"
+            type="button"
+            title="Sign out"
+            aria-label="Sign out"
+          >
+            ↪
           </button>
         </div>
       </nav>
     </header>
-
-    <aside id="global-runtime-banner" class="runtime-banner hidden">
-      <div class="banner-content">
-        <div class="banner-status-indicator">
-          <span class="status-dot"></span>
-          <span id="banner-status-text">ACTIVE ENVIRONMENT</span>
-        </div>
-        <div id="banner-details" class="banner-details">
-          <span id="banner-exercise-name" class="banner-exercise"></span>
-          <div id="banner-ssh-container" class="ssh-container">
-            <span class="terminal-prompt">$</span>
-            <code id="banner-ssh-cmd" class="ssh-command"></code>
-            <button id="banner-btn-copy" class="btn-copy" title="Copy SSH command">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="#icon-copy"></use></svg>
-              COPY
-            </button>
-          </div>
-        </div>
-        <div class="banner-actions">
-          <button id="banner-btn-stop" class="btn btn-danger btn-sm">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><use href="#icon-stop"></use></svg>
-            STOP
-          </button>
-        </div>
-      </div>
-    </aside>
-
-    <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
-
-    <main class="main-content">
-      <section id="view-login" class="view hidden">
-        <div class="auth-card">
-          <div class="card-system-tag">EVALOPS // CONSOLE LOGIN</div>
-          <h2>Authentication</h2>
-          <p class="auth-subtitle">Access your DevOps workspace console and training labs</p>
-          <form id="form-login">
-            <div class="form-group">
-              <label for="login-email">Email address</label>
-              <input type="email" id="login-email" required placeholder="student@example.edu" autocomplete="email">
-            </div>
-            <div class="form-group">
-              <label for="login-password">Password</label>
-              <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password">
-            </div>
-            <div id="login-error" class="alert alert-error hidden" role="alert"></div>
-            <button type="submit" id="login-submit" class="btn btn-primary btn-block">Sign In</button>
-          </form>
-        </div>
-      </section>
-
-      <section id="view-courses" class="view hidden">
-        <div class="view-header">
-          <div class="card-system-tag">CATALOG // CURRICULUM</div>
-          <h2>DevOps Modules</h2>
-          <p class="view-desc">Select a module to start or continue your practical coursework.</p>
-        </div>
-        <div id="courses-list" class="courses-grid"></div>
-      </section>
-
-      <section id="view-course-detail" class="view hidden">
-        <div class="view-breadcrumb">
-          <a href="#courses">← BACK TO MODULES</a>
-        </div>
-        <div class="course-meta-header">
-          <div>
-            <div class="card-system-tag">MODULE SPECIFICATION</div>
-            <h2 id="course-title"></h2>
-          </div>
-          <div id="course-deadline-badge" class="meta-badge"></div>
-        </div>
-        <div id="course-exercises-container" class="difficulty-sections"></div>
-      </section>
-
-      <section id="view-exercise" class="view hidden">
-        <div class="view-breadcrumb">
-          <a id="exercise-breadcrumb-link" href="#courses">← BACK TO MODULE</a>
-        </div>
-
-        <div class="exercise-header">
-          <div>
-            <div class="card-system-tag">EXERCISE SPECIFICATION</div>
-            <h2 id="exercise-title"></h2>
-            <div class="exercise-tags">
-              <span id="exercise-diff-tag" class="tag"></span>
-              <span id="exercise-status-tag" class="tag tag-status"></span>
-              <span id="exercise-quota-tag" class="tag tag-quota hidden"></span>
-            </div>
-          </div>
-          <div class="exercise-actions">
-            <button id="btn-start" class="btn btn-primary">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><use href="#icon-play"></use></svg>
-              START ENVIRONMENT
-            </button>
-            <button id="btn-grade" class="btn btn-success">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="#icon-check"></use></svg>
-              EVALUATE
-            </button>
-            <button id="btn-stop" class="btn btn-danger">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><use href="#icon-stop"></use></svg>
-              STOP
-            </button>
-          </div>
-        </div>
-
-        <div id="operation-notice" class="alert alert-info hidden"></div>
-
-        <div class="exercise-layout">
-          <div class="exercise-readme">
-            <div class="card">
-              <div class="card-tab">
-                <span>README.md // SPECIFICATIONS</span>
-                <span class="mono">MARKDOWN</span>
-              </div>
-              <div id="exercise-readme-content" class="markdown-body"></div>
-            </div>
-          </div>
-
-          <aside class="exercise-sidebar">
-            <div class="card resources-card">
-              <div class="card-tab">
-                <span>RESOURCES // ATTACHMENTS</span>
-                <span class="mono">FILES</span>
-              </div>
-              <div id="exercise-resources-list" class="resources-list"></div>
-            </div>
-
-            <div class="card history-card">
-              <div class="card-tab">
-                <span>HISTORY // AUDIT TRAIL</span>
-                <span class="mono">LOGS</span>
-              </div>
-              <div id="exercise-history-list" class="history-list"></div>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <section id="view-profile" class="view hidden">
-        <div class="view-header">
-          <div class="card-system-tag">SECURITY // IDENTITY</div>
-          <h2>Profile &amp; Settings</h2>
-          <p class="view-desc">Configure your public SSH access key and manage your account credentials.</p>
-        </div>
-
-        <div class="profile-cards">
-          <div class="card">
-            <div class="card-tab">
-              <span>SSH CREDENTIALS // AUTHORIZED_KEYS</span>
-              <span class="mono">ED25519 ONLY</span>
-            </div>
-            <h3>Public SSH Key</h3>
-            <p class="card-subtitle">
-              Required format: <code>ssh-ed25519 &lt;key_base64&gt;</code> (single line, no comments or options).
-            </p>
-            <form id="form-ssh-key">
-              <div class="form-group">
-                <label for="profile-ssh-key">Public key (single line, without comments)</label>
-                <textarea id="profile-ssh-key" rows="4" placeholder="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI..." required></textarea>
-              </div>
-              <div id="ssh-key-feedback" class="feedback-msg hidden"></div>
-              <button type="submit" id="btn-save-ssh-key" class="btn btn-primary">Save SSH Key</button>
-            </form>
-          </div>
-
-          <div class="card">
-            <div class="card-tab">
-              <span>AUTHENTICATION // SECURITY</span>
-              <span class="mono">PASSWORD</span>
-            </div>
-            <h3>Change Password</h3>
-            <p class="card-subtitle">
-              Changing your password will automatically revoke all your other active sessions.
-            </p>
-            <form id="form-password">
-              <div class="form-group">
-                <label for="pwd-current">Current password</label>
-                <input type="password" id="pwd-current" required autocomplete="current-password">
-              </div>
-              <div class="form-group">
-                <label for="pwd-new">New password (min. 8 characters)</label>
-                <input type="password" id="pwd-new" required minlength="8" autocomplete="new-password">
-              </div>
-              <div class="form-group">
-                <label for="pwd-confirm">Confirm new password</label>
-                <input type="password" id="pwd-confirm" required minlength="8" autocomplete="new-password">
-              </div>
-              <div id="password-feedback" class="feedback-msg hidden"></div>
-              <button type="submit" id="btn-save-password" class="btn btn-secondary">Update Password</button>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      <section id="view-admin" class="view hidden">
-        <div class="view-header admin-header-flex">
-          <div>
-            <div class="card-system-tag">ADMINISTRATION // CONTROL PANEL</div>
-            <h2>Platform Administration</h2>
-            <p class="view-desc">Monitor workloads, query user records, audit evaluations, and manage environment locks.</p>
-          </div>
-          <div class="admin-header-actions">
-            <button id="admin-btn-refresh" class="btn btn-secondary btn-sm" title="Refresh all data">
-              REFRESH
-            </button>
-            <button id="admin-btn-new-user" class="btn btn-primary btn-sm">
-              + CREATE USER
-            </button>
-          </div>
-        </div>
-
-        <!-- Admin Sub-Navigation Tabs -->
-        <div class="admin-tabs-nav" role="tablist">
-          <button class="admin-tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
-            Overview &amp; Metrics
-          </button>
-          <button class="admin-tab-btn" data-tab="tab-users" role="tab" aria-selected="false">
-            Users Directory (<span id="admin-users-badge">-</span>)
-          </button>
-          <button class="admin-tab-btn" data-tab="tab-environments" role="tab" aria-selected="false">
-            Active Operations (<span id="admin-env-badge">0</span>)
-          </button>
-          <button class="admin-tab-btn" data-tab="tab-evaluations" role="tab" aria-selected="false">
-            Audit Logs (<span id="admin-eval-badge">-</span>)
-          </button>
-        </div>
-
-        <!-- TAB 1: OVERVIEW & STATS -->
-        <div id="tab-overview" class="admin-tab-content">
-          <div class="admin-stats-grid">
-            <div class="card stat-card">
-              <div class="stat-tag">METRICS // USERS</div>
-              <div class="stat-value" id="stat-total-users">-</div>
-              <div class="stat-label">Total Accounts</div>
-            </div>
-            <div class="card stat-card">
-              <div class="stat-tag">METRICS // EVALUATIONS</div>
-              <div class="stat-value" id="stat-total-evals">-</div>
-              <div class="stat-label">Total Lab Runs</div>
-            </div>
-            <div class="card stat-card">
-              <div class="stat-tag">METRICS // PASS RATE</div>
-              <div class="stat-value text-success" id="stat-passed-evals">-</div>
-              <div class="stat-label" id="stat-pass-rate">Passed Validations</div>
-            </div>
-            <div class="card stat-card">
-              <div class="stat-tag">METRICS // RUNTIMES</div>
-              <div class="stat-value text-accent" id="stat-active-ops">-</div>
-              <div class="stat-label">In-Flight Operations</div>
-            </div>
-          </div>
-
-          <div class="card admin-section-card">
-            <div class="card-tab">
-              <span>QUICK STATUS // RECENT ACTIVITY &amp; LOCKS</span>
-              <span class="mono">STATUS</span>
-            </div>
-            <div id="admin-overview-active-env" class="admin-card-inner"></div>
-          </div>
-        </div>
-
-        <!-- TAB 2: USERS DIRECTORY -->
-        <div id="tab-users" class="admin-tab-content hidden">
-          <div class="admin-filters-bar">
-            <div class="filter-group filter-search">
-              <input type="text" id="admin-users-search" class="admin-input" placeholder="Search by email address...">
-            </div>
-            <div class="filter-group">
-              <select id="admin-users-role-filter" class="admin-select">
-                <option value="">All Roles</option>
-                <option value="student">Students</option>
-                <option value="admin">Administrators</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="card admin-table-card">
-            <div class="table-responsive">
-              <table class="admin-table" id="admin-users-table">
-                <thead>
-                  <tr>
-                    <th>USER / EMAIL</th>
-                    <th>ROLE</th>
-                    <th>SSH PUBLIC KEY</th>
-                    <th>CREATED AT</th>
-                    <th class="text-right">ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-users-tbody"></tbody>
-              </table>
-            </div>
-            <div class="admin-pagination" id="admin-users-pagination"></div>
-          </div>
-        </div>
-
-        <!-- TAB 3: ACTIVE ENVIRONMENTS & LOCKS -->
-        <div id="tab-environments" class="admin-tab-content hidden">
-          <div class="card admin-table-card">
-            <div class="card-tab">
-              <span>CONCURRENCY LOCKS // IN-FLIGHT RUNTIMES</span>
-              <span class="mono">SYSTEM LOCKS</span>
-            </div>
-            <div class="table-responsive">
-              <table class="admin-table" id="admin-env-table">
-                <thead>
-                  <tr>
-                    <th>STUDENT EMAIL</th>
-                    <th>OPERATION</th>
-                    <th>EXERCISE</th>
-                    <th>PHASE</th>
-                    <th>STARTED AT</th>
-                    <th class="text-right">ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-env-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 4: EVALUATIONS AUDIT LOG -->
-        <div id="tab-evaluations" class="admin-tab-content hidden">
-          <div class="admin-filters-bar">
-            <div class="filter-group">
-              <input type="text" id="admin-evals-student-filter" class="admin-input" placeholder="Filter by Student ID...">
-            </div>
-            <div class="filter-group">
-              <input type="text" id="admin-evals-exercise-filter" class="admin-input" placeholder="Filter by Exercise ID...">
-            </div>
-            <div class="filter-group">
-              <select id="admin-evals-status-filter" class="admin-select">
-                <option value="">All Statuses</option>
-                <option value="completed">Completed</option>
-                <option value="running">Running</option>
-                <option value="error">Error</option>
-                <option value="interrupted">Interrupted</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="card admin-table-card">
-            <div class="table-responsive">
-              <table class="admin-table" id="admin-evals-table">
-                <thead>
-                  <tr>
-                    <th>EVALUATION ID</th>
-                    <th>STUDENT ID</th>
-                    <th>EXERCISE</th>
-                    <th>SCORE</th>
-                    <th>STATUS</th>
-                    <th>TIMESTAMP</th>
-                    <th class="text-right">DETAILS</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-evals-tbody"></tbody>
-              </table>
-            </div>
-            <div class="admin-pagination" id="admin-evals-pagination"></div>
-          </div>
-        </div>
-      </section>
+    <aside
+      id="runtime-banner"
+      class="runtime-banner"
+      aria-label="Development environment"
+      hidden
+    ></aside>
+    <main id="main" class="main-content" tabindex="-1">
+      <p class="loading-message" role="status">Connecting to your workspace…</p>
     </main>
-
     <footer class="app-footer">
-      <div class="footer-content">
-        <div class="footer-left">
-          <span class="footer-brand">EVALOPS</span>
-          <span class="footer-divider">//</span>
-          <span class="footer-tagline">Automated DevOps Assessment Platform</span>
-        </div>
-        <div class="footer-right">
-          <span>Made with &lt;3 by Oreo</span>
-        </div>
-      </div>
+      <span
+        ><strong>EVALOPS</strong> <span class="text-dim">//</span> Automated
+        DevOps Assessment Platform</span
+      ><span>Made with &lt;3 by Oreo</span>
     </footer>
-
-    <div id="modal-eval" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-eval-title">
-      <div class="modal-card">
-        <div class="modal-header">
-          <h3 id="modal-eval-title">EVALUATION REPORT</h3>
-          <button id="modal-eval-close" class="btn btn-ghost" title="Close" aria-label="Close evaluation report">&times;</button>
-        </div>
-        <div id="modal-eval-body" class="modal-body"></div>
+    <div
+      id="toasts"
+      class="toast-container"
+      role="status"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
+    <dialog id="report-dialog" aria-labelledby="report-title">
+      <div class="modal-header">
+        <h2 id="report-title">Evaluation report</h2>
+        <button
+          class="btn btn-ghost"
+          type="button"
+          id="report-close"
+          aria-label="Close evaluation report"
+        >
+          ×
+        </button>
       </div>
-    </div>
-
-    <div id="modal-create-user" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-create-user-title">
-      <div class="modal-card">
-        <div class="modal-header">
-          <h3 id="modal-create-user-title">CREATE NEW USER</h3>
-          <button id="modal-create-user-close" class="btn btn-ghost" title="Close" aria-label="Close user modal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <form id="form-admin-create-user">
-            <div class="form-group">
-              <label for="admin-new-email">Email Address</label>
-              <input type="email" id="admin-new-email" required placeholder="user@ecole.fr" autocomplete="email">
-            </div>
-            <div class="form-group">
-              <label for="admin-new-password">Initial Password (min. 8 characters)</label>
-              <input type="password" id="admin-new-password" required minlength="8" placeholder="••••••••" autocomplete="new-password">
-            </div>
-            <div class="form-group">
-              <label for="admin-new-role">Role</label>
-              <select id="admin-new-role" class="admin-select">
-                <option value="student">Student</option>
-                <option value="admin">Administrator</option>
-              </select>
-            </div>
-            <div id="admin-create-user-error" class="alert alert-error hidden"></div>
-            <div class="modal-actions-bar">
-              <button type="button" id="admin-btn-cancel-create" class="btn btn-secondary">Cancel</button>
-              <button type="submit" id="admin-btn-submit-create" class="btn btn-primary">Create Account</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <template id="template-course-card">
-    <a class="card course-card">
-      <div class="course-card-top">
-        <div class="card-system-tag" data-field="id"></div>
-        <div class="course-card-header">
-          <h3 class="course-card-title" data-field="name"></h3>
-          <span class="tag" data-field="status"></span>
-        </div>
-        <div class="meta-badge"><span class="mono-meta" data-field="deadline"></span></div>
-        <div class="progress-bar-container"><div class="progress-bar-fill" data-field="progress"></div></div>
-      </div>
-      <div class="course-card-stats">
-        <span class="score-metric">VALIDATED <strong class="mono-val" data-field="score"></strong></span>
-        <span class="course-card-action">OPEN →</span>
-      </div>
-    </a>
-  </template>
-  <template id="template-difficulty-section">
-    <div class="difficulty-section">
-      <h3 class="difficulty-title"></h3>
-      <div class="exercises-grid"></div>
-    </div>
-  </template>
-  <template id="template-exercise-tile">
-    <a class="exercise-tile">
-      <div class="exercise-tile-header">
-        <div class="exercise-tile-id" data-field="id"></div>
-        <span class="exercise-tile-title" data-field="name"></span>
-      </div>
-      <div class="exercise-tile-footer">
-        <span data-field="status"></span>
-        <span class="exercise-tile-arrow">OPEN →</span>
-      </div>
-    </a>
-  </template>
-  <template id="template-exercise-resource">
-    <div class="resource-item">
-      <div class="resource-info">
-        <svg class="text-dim" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><use href="#icon-file"></use></svg>
-        <span class="mono" data-resource-name></span>
-      </div>
-      <a class="btn btn-secondary btn-sm" data-resource-download download>DOWNLOAD</a>
-    </div>
-  </template>
-  <template id="template-exercise-history">
-    <div class="history-item" role="button" tabindex="0">
-      <div class="history-summary">
-        <div class="history-badge-wrapper"><span class="history-status" data-history-status></span></div>
-        <div class="history-actions-wrapper">
-          <span class="mono text-dim" data-history-date></span>
-          <button class="btn-snapshot-download" type="button" title="Download snapshot archive (.tar.gz)" aria-label="Download snapshot archive (.tar.gz)">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><use href="#icon-download"></use></svg>
-          </button>
-        </div>
-      </div>
-      <div class="history-meta" data-history-meta></div>
-    </div>
-  </template>
-  <template id="template-evaluation-error">
-    <div class="alert alert-error">
-      <strong>SYSTEM ERROR:</strong> <span data-error-code></span>
-      <p class="evaluation-error-message" data-error-message></p>
-    </div>
-  </template>
-  <template id="template-evaluation-summary">
-    <div>
-      <div class="evaluation-summary-title" data-summary-score></div>
-      <div class="evaluation-summary-detail" data-summary-detail></div>
-    </div>
-  </template>
-  <template id="template-evaluation-test">
-    <div class="test-result-item">
-      <div class="test-result-heading">
-        <span class="text-white" data-test-name></span>
-        <span class="tag" data-test-status></span>
-      </div>
-      <div class="test-result-message" data-test-message></div>
-    </div>
-  </template>
-
-  <script type="module" src="app.js"></script>
-</body>
+      <div id="report-body" class="modal-body"></div>
+    </dialog>
+    <noscript
+      ><p class="alert">
+        JavaScript is required to use the workspace console.
+      </p></noscript
+    >
+  </body>
 </html>

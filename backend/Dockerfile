@@ -1,18 +1,10 @@
-FROM python:3.11-slim
-
+FROM python:3.11-slim-bookworm
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt /app/requirements.txt
+COPY backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
-COPY shared /app/shared
-COPY backend/src /app/backend/src
-
-ENV PYTHONPATH=/app
-
-CMD ["uvicorn", "backend.src.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+COPY backend /app/backend
+RUN useradd --uid 10001 --create-home evalops
+USER 10001:10001
+EXPOSE 8080
+CMD ["python", "-m", "backend.src.main"]

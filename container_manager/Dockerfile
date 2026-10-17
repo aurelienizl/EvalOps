@@ -1,18 +1,8 @@
-FROM python:3.11-slim
-
+FROM python:3.11-slim-bookworm
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt /app/requirements.txt
+COPY container_manager/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
-COPY shared /app/shared
-COPY container_manager/src /app/container_manager/src
-
-ENV PYTHONPATH=/app
-
-CMD ["uvicorn", "container_manager.src.app:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "1"]
+COPY container_manager /app/container_manager
+EXPOSE 8001
+CMD ["python", "-m", "container_manager.src.main"]

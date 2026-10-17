@@ -1,74 +1,93 @@
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./frontend/public:/usr/share/nginx/html:ro
-      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    networks:
-      - frontend_backend
-    restart: unless-stopped
-
-  backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    volumes:
-      - backend_data:/data
-      - ./courses:/courses:ro
+  db:
+    image: postgres:18-bookworm
     environment:
-      - COURSES_PATH=/courses
-      - DATABASE_PATH=/data/app.db
-      - CONTAINER_MANAGER_URL=http://container_manager:8001
-    networks:
-      - frontend_backend
-      - backend_manager
-    depends_on:
-      container_manager:
-        condition: service_healthy
+      POSTGRES_DB: evalops
+      POSTGRES_USER: evalops_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      BACKEND_DB_PASSWORD: ${BACKEND_DB_PASSWORD:?Set BACKEND_DB_PASSWORD}
+      MANAGER_DB_PASSWORD: ${MANAGER_DB_PASSWORD:?Set MANAGER_DB_PASSWORD}
+    volumes:
+      - database:/var/lib/postgresql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/init-roles.sh:/docker-entrypoint-initdb.d/02-roles.sh:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/ready"]
-      interval: 30s
+      test: [CMD-SHELL, 'pg_isready -U evalops_owner -d evalops']
+      interval: 3s
       timeout: 3s
-      retries: 10
+      retries: 20
     restart: unless-stopped
-
   container_manager:
     build:
       context: .
       dockerfile: container_manager/Dockerfile
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./courses:/courses:ro
-      - /tmp:/tmp
-      - /var/lib/docker/volumes:/var/lib/docker/volumes
-      - manager_data:/data
     environment:
-      - COURSES_PATH=/courses
-      - PLATFORM_INSTANCE=${PLATFORM_INSTANCE:-evalops-prod}
-      - SSH_HOST=${SSH_HOST:-localhost}
-      - SSH_BIND_ADDRESS=${SSH_BIND_ADDRESS:-0.0.0.0}
-      - SSH_PORT_MIN=${SSH_PORT_MIN:-22000}
-      - SSH_PORT_MAX=${SSH_PORT_MAX:-22999}
-    networks:
-      - backend_manager
+      DATABASE_URL: postgresql://evalops_manager:${MANAGER_DB_PASSWORD}@db/evalops
+      COURSES_ROOT: /app/courses
+      DATA_ROOT: ${DATA_ROOT:-/var/lib/evalops}
+      DATA_SHARED_GID: 10001
+      DEPLOYMENT_ID: ${DEPLOYMENT_ID:-evalops}
+      SSH_BIND_ADDRESS: ${SSH_BIND_ADDRESS:-0.0.0.0}
+      SSH_PORT_MIN: ${SSH_PORT_MIN:-20000}
+      SSH_PORT_MAX: ${SSH_PORT_MAX:-30000}
+      POLL_INTERVAL_SECONDS: ${POLL_INTERVAL_SECONDS:-1}
+      ENVIRONMENT_TTL_SECONDS: ${ENVIRONMENT_TTL_SECONDS:-7200}
+    volumes:
+      - ./courses:/app/courses:ro
+      - ${DATA_ROOT:-/var/lib/evalops}:${DATA_ROOT:-/var/lib/evalops}
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      db:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/v1/health"]
-      start_period: ${CONTAINER_MANAGER_START_PERIOD:-30m}
-      interval: 30s
+      test: [CMD, python, -c, 'import urllib.request; urllib.request.urlopen("http://localhost:8001/ready",timeout=2)']
+      interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 120
+      start_period: 10m
     restart: unless-stopped
-
-networks:
-  frontend_backend:
-    driver: bridge
-  backend_manager:
-    driver: bridge
-
+    stop_grace_period: 60s
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://evalops_backend:${BACKEND_DB_PASSWORD}@db/evalops
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      COURSES_ROOT: /app/courses
+      DATA_ROOT: ${DATA_ROOT:-/var/lib/evalops}
+      SSH_HOST: ${SSH_HOST:-localhost}
+      MAX_ENVIRONMENTS: ${MAX_ENVIRONMENTS:-20}
+    expose:
+      - 8080
+    volumes:
+      - ./courses:/app/courses:ro
+      - ${DATA_ROOT:-/var/lib/evalops}/snapshots:${DATA_ROOT:-/var/lib/evalops}/snapshots:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      container_manager:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, 'import urllib.request; urllib.request.urlopen("http://localhost:8080/healthz",timeout=2)']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - 127.0.0.1:8080:8080
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1:8080/]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
 volumes:
-  backend_data:
-  manager_data:
+  database:

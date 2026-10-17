@@ -1,1 +1,1 @@
-"""Container Manager package for EvalOps."""
+"""EvalOps catalog loader and sequential container manager."""

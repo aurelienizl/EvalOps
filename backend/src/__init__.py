@@ -1,1 +1,1 @@
-"""Backend package for EvalOps."""
+"""EvalOps backend: authenticated API and PostgreSQL work admission."""

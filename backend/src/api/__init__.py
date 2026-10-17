@@ -1,1 +1,1 @@
-"""API package for EvalOps Backend."""
+"""HTTP handlers grouped by feature."""

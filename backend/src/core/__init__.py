@@ -1,1 +1,1 @@
-"""Core module containing security, configuration, and dependencies."""
+"""Shared settings and authentication/security contracts."""

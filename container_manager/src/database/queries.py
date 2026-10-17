@@ -42,7 +42,7 @@ async def get_ssh_key(connection, user_id):
 
 
 async def mark_environment_running(
-    connection, user_id, operation_id, container_id, ssh_port, ttl_seconds=7200
+    connection, user_id, operation_id, container_id, ssh_port, ttl_seconds=43200
 ):
     result = await connection.execute(
         """UPDATE environments SET status='running',container_id=$3,ssh_port=$4,

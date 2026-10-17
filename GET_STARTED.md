@@ -23,7 +23,7 @@ Edit `.env`:
   `false` for local HTTP. The proxy should forward to `127.0.0.1:8080`.
 
 Other defaults are in [compose.yaml](compose.yaml), including the environment
-limit (`MAX_ENVIRONMENTS=20`), lifetime (`ENVIRONMENT_TTL_SECONDS=7200`) and manager
+limit (`MAX_ENVIRONMENTS=20`), lifetime (`ENVIRONMENT_TTL_SECONDS=43200`, 12 hours) and manager
 polling interval (`POLL_INTERVAL_SECONDS=1`).
 
 ## 2. Start

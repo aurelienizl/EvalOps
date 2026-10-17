@@ -31,7 +31,7 @@ services:
       SSH_PORT_MIN: ${SSH_PORT_MIN:-20000}
       SSH_PORT_MAX: ${SSH_PORT_MAX:-30000}
       POLL_INTERVAL_SECONDS: ${POLL_INTERVAL_SECONDS:-1}
-      ENVIRONMENT_TTL_SECONDS: ${ENVIRONMENT_TTL_SECONDS:-7200}
+      ENVIRONMENT_TTL_SECONDS: ${ENVIRONMENT_TTL_SECONDS:-43200}
     volumes:
       - ./courses:/app/courses:ro
       - ${DATA_ROOT:-/var/lib/evalops}:${DATA_ROOT:-/var/lib/evalops}

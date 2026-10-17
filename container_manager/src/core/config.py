@@ -26,7 +26,7 @@ class Settings:
     container_memory_bytes: int = 512 * 1024 * 1024
     container_pids_limit: int = 128
     max_result_bytes: int = 1024 * 1024
-    environment_ttl_seconds: int = 7200
+    environment_ttl_seconds: int = 43200
     max_workspace_bytes: int = 100 * 1024 * 1024
     max_workspace_files: int = 10000
 

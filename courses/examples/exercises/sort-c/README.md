@@ -34,7 +34,8 @@ Output:
 ## Instructions
 
 1. Connect to your development environment over SSH.
-2. Create `sort.c` in `/home/student/sort-c`.
+2. Create the exercise directory with `mkdir -p ~/sort-c`, then create
+   `sort.c` inside it.
 3. Compile your program:
    ```sh
    cd ~/sort-c

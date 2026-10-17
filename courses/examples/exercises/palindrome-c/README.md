@@ -32,7 +32,8 @@ YES
 ## Instructions
 
 1. Connect to your development environment over SSH.
-2. Create `palindrome.c` in `/home/student/palindrome-c`.
+2. Create the exercise directory with `mkdir -p ~/palindrome-c`, then create
+   `palindrome.c` inside it.
 3. Compile your program:
    ```sh
    cd ~/palindrome-c

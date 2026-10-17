@@ -71,7 +71,7 @@ class Deployment:
 import os, shutil
 from pathlib import Path
 root = Path(os.environ['DATA_ROOT'])
-for name in ('workspaces', 'keys', 'snapshots'):
+for name in ('homes', 'keys', 'snapshots'):
     path = root / name
     if path.is_symlink():
         path.unlink()

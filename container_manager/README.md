@@ -20,10 +20,10 @@ Grading also queues other students' start/stop requests until the action finishe
 
 ## Actions
 
-- **Start:** prepare the saved workspace and SSH key, launch a development
-  container, wait for SSH readiness, then record its container ID and port.
+- **Start:** prepare the student's shared home and SSH key,
+  launch a development container, wait for SSH readiness, then record its ID and port.
 - **Stop:** remove the development container, confirm removal, then release its
-  state. Student files remain on disk.
+  state. Student homes and exercise files remain on disk, including after expiration.
 - **Grade:** the backend first requires the exercise's environment to be running
   and reserves it as `grading`. The manager stops all development containers for
   that student, archives the workspace, runs the evaluator with limits, collects
@@ -33,6 +33,15 @@ State updates check operation IDs to avoid overwriting newer requests. Recovery
 retries uncertain cleanup, expires environments and handles interrupted grading.
 Unconfirmed cleanup keeps controls locked. Evaluators have no network, and student
 programs run separately from the trusted grader's results directory.
+
+Development containers mount only `DATA_ROOT/homes/<user-id>` at `/home/student`
+for student data. Students create and manage their exercise folders themselves,
+and can access all their files in one session. Missing `/etc/skel` defaults are
+copied as the student without replacing personal files. The root filesystem and
+manager-owned SSH material remain read-only. `workspace_dir` is used only for
+grading: it validates and mounts `homes/<user-id>/<workspace_dir>` read-only;
+snapshots include only that exercise
+folder. SSH remains available to repair an invalid exercise tree.
 
 ## Code layout
 

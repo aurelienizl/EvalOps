@@ -29,7 +29,8 @@ Output:
 ## Instructions
 
 1. Connect to your development environment over SSH.
-2. Create `square.c` in `/home/student/square-c`.
+2. Create the exercise directory with `mkdir -p ~/square-c`, then create
+   `square.c` inside it.
 3. Compile your program:
    ```sh
    cd ~/square-c

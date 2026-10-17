@@ -41,7 +41,8 @@ Output:
 ## Instructions
 
 1. Connect to your development environment over SSH.
-2. Create `shortest_path.c` in `/home/student/shortest-path-c`.
+2. Create the exercise directory with `mkdir -p ~/shortest-path-c`, then create
+   `shortest_path.c` inside it.
 3. Compile your program:
    ```sh
    cd ~/shortest-path-c

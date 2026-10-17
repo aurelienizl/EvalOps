@@ -65,6 +65,7 @@ def test_development_image_starts_ssh_and_can_compile_as_student(images, tmp_pat
         else:
             pytest.fail("SSH did not become healthy:\n" + docker("logs", container).stderr)
         source = tmp_path / "reference.c"
+        docker("exec", "--user", "1000:1000", container, "mkdir", f"/home/student/{exercise}")
         source.write_text(solution(exercise))
         docker("cp", source, f"{container}:/tmp/reference.c")
         docker(

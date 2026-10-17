@@ -118,8 +118,7 @@ async def create_development_container(
     exercise_id,
     operation_id,
     image,
-    workspace,
-    workspace_dir,
+    home,
     authorized_key,
 ):
     name = f"evalops-{settings.deployment_id}-dev-{operation_id}"
@@ -142,17 +141,16 @@ async def create_development_container(
                         image,
                         name=name,
                         labels=labels,
+                        working_dir="/home/student",
                         entrypoint=[
                             "/bin/sh",
                             "-c",
-                            "mkdir -p /run/sshd && exec /usr/sbin/sshd -D -e -f /etc/ssh/sshd_config",
+                            "mkdir -p /run/sshd && "
+                            "su -s /bin/sh -c 'cp -Rn /etc/skel/. /home/student/' student && "
+                            "exec /usr/sbin/sshd -D -e -f /etc/ssh/sshd_config",
                         ],
-                        environment={"WORKSPACE_DIR": f"/home/student/{workspace_dir}"},
                         volumes={
-                            str(workspace): {
-                                "bind": f"/home/student/{workspace_dir}",
-                                "mode": "rw",
-                            },
+                            str(home): {"bind": "/home/student", "mode": "rw"},
                             str(authorized_key): {
                                 "bind": "/etc/training/authorized_keys/student",
                                 "mode": "ro",

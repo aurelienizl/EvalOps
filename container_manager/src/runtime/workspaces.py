@@ -1,11 +1,10 @@
-"""Persistent workspaces and manager-owned SSH material."""
+"""Persistent student homes, exercise workspaces and manager-owned SSH material."""
 
 from dataclasses import dataclass
 from pathlib import Path
 from uuid import UUID
 import os
 import stat
-import shutil
 import tarfile
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.serialization import (
@@ -17,7 +16,7 @@ from cryptography.hazmat.primitives.serialization import (
 
 
 @dataclass(frozen=True)
-class DevelopmentWorkspace:
+class DevelopmentHome:
     directory: Path
     authorized_key: Path
 
@@ -34,31 +33,19 @@ def _contained(root, path):
     return path
 
 
-def workspace_path(settings, user_id, exercise):
+def home_path(settings, user_id):
     return _contained(
         settings.data_root,
-        settings.data_root / "workspaces" / str(UUID(str(user_id))) / exercise["id"],
+        settings.data_root / "homes" / str(UUID(str(user_id))),
     )
 
 
-def prepare_development_workspace(settings, user_id, exercise, public_key):
-    path = workspace_path(settings, user_id, exercise)
-    new = not path.exists()
-    path.mkdir(parents=True, exist_ok=True)
-    if new:
-        os.chown(path, 1000, 1000)
-        path.chmod(0o750)
-        for resource in exercise.get("resources", []):
-            source = _contained(
-                settings.courses_root, settings.courses_root / resource["file_path"]
-            )
-            target = path / source.name
-            if source.is_file() and not target.exists():
-                shutil.copyfile(source, target)
-                os.chown(target, 1000, 1000)
-    keys = _contained(
-        settings.data_root, settings.data_root / "keys" / str(user_id) / exercise["id"]
-    )
+def prepare_development_home(settings, user_id, exercise_id, public_key):
+    home = home_path(settings, user_id)
+    home.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chown(home, 1000, 1000)
+    home.chmod(0o700)
+    keys = _contained(settings.data_root, settings.data_root / "keys" / str(user_id) / exercise_id)
     keys.mkdir(parents=True, exist_ok=True)
     keys.chmod(0o755)
     keyfile = keys / "authorized_keys"
@@ -94,11 +81,11 @@ X11Forwarding no
 ClientAliveInterval 30
 ClientAliveCountMax 5
 """)
-    return DevelopmentWorkspace(path, keyfile)
+    return DevelopmentHome(home, keyfile)
 
 
 def require_grading_workspace(settings, user_id, exercise):
-    path = workspace_path(settings, user_id, exercise)
+    path = _contained(settings.data_root, home_path(settings, user_id) / exercise["workspace_dir"])
     if not path.is_dir():
         raise ValueError("No saved workspace for this exercise")
     return path

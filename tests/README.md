@@ -7,7 +7,7 @@ frontend proxy. All suites use the same Compose file and database.
 
 **Development use only:** before running, the suite stops the current Compose
 project, removes its database volume and managed containers/networks, and deletes
-`DATA_ROOT/workspaces`, `keys` and `snapshots`. It repeats cleanup at the end.
+`DATA_ROOT/homes`, `keys` and `snapshots`. It repeats cleanup at the end.
 Exercise sources and cached images are kept. Other deployments are not removed.
 
 ## Run
@@ -32,7 +32,7 @@ starts with the same full reset. Run suites sequentially against this deployment
 | Directory | Checks |
 | --- | --- |
 | `backend/` | Real API authentication, catalog/resources, permissions, start/stop and grading races, quotas, deadlines, reports and admin cleanup |
-| `container_manager/` | Running manager: catalog loading, instance guard, database requests, SSH, persistence, crash recovery, grading timeout and interrupted grading |
+| `container_manager/` | Running manager: catalog loading, instance guard, database requests, SSH, shared home/settings persistence, student-created exercise folders, grading-only workspace configuration, cross-exercise cleanup, student isolation, tree repair, expiration, crash recovery, grading timeout and interrupted grading |
 | `functional/` | Five concurrent students compile over SSH, submit passing/failing work, inspect snapshots, fix and resubmit, then complete a second exercise |
 | `frontend/` | Optional Chromium checks for teacher search, progress, reports, refresh stability, mobile layout, workspace stopping and student access restrictions |
 | `tools/` | Shared deployment reset, SQL requests, HTTP client, `SshClient`, user setup and bounded polling |

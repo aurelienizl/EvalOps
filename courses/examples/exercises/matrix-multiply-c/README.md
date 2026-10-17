@@ -41,7 +41,8 @@ Output:
 ## Instructions
 
 1. Connect to your development environment over SSH.
-2. Create `matrix.c` in `/home/student/matrix-multiply-c`.
+2. Create the exercise directory with `mkdir -p ~/matrix-multiply-c`, then create
+   `matrix.c` inside it.
 3. Compile your program:
    ```sh
    cd ~/matrix-multiply-c

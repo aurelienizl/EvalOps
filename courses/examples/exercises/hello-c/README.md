@@ -25,7 +25,8 @@ Hello C
 ## Instructions
 
 1. Connect to your development environment over SSH.
-2. Create `main.c` in `/home/student/hello-c`.
+2. Create the exercise directory with `mkdir -p ~/hello-c`, then create
+   `main.c` inside it.
 3. Compile your program:
    ```sh
    cd ~/hello-c

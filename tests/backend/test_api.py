@@ -90,6 +90,7 @@ def test_grading_admission_and_races(deployment, users):
         assert student.api.get("/exercises/hello-c").json()["quota"] == quota
         assert student.api.get("/exercises/hello-c/evaluations").json()["total"] == 0
     ssh = student.start()
+    ssh.run("mkdir hello-c")
     ssh.write("hello-c/main.c", SLOW_HELLO)
     with ThreadPoolExecutor(max_workers=6) as executor:
         responses = list(
@@ -124,6 +125,7 @@ def test_grading_admission_and_races(deployment, users):
 def test_reports_snapshots_and_admin_cleanup(deployment, users):
     student, other, admin = users(), users(), users(role="admin")
     ssh = student.start()
+    ssh.run("mkdir hello-c")
     ssh.write("hello-c/main.c", HELLO)
     evaluation_id = student.submit()
     report = student.report(evaluation_id)
@@ -151,7 +153,9 @@ def test_quota_and_deadline(deployment, users):
     deadline = db.rows("SELECT deadline FROM courses WHERE id='examples'")[0]["deadline"]
     try:
         db.execute("UPDATE exercises SET max_evaluations=1 WHERE id='hello-c';")
-        student.start().write("hello-c/main.c", HELLO)
+        ssh = student.start()
+        ssh.run("mkdir hello-c")
+        ssh.write("hello-c/main.c", HELLO)
         assert student.report(student.submit())["is_success"]
         student.start()
         response = student.api.post("/exercises/hello-c/grade", expected=429)

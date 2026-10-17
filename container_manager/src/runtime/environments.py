@@ -5,7 +5,7 @@ from docker.errors import NotFound
 from ..database import queries as q
 from ..database.connection import transaction, lock_student_row
 from . import docker as d
-from .workspaces import prepare_development_workspace
+from .workspaces import prepare_development_home
 
 log = logging.getLogger(__name__)
 
@@ -43,16 +43,11 @@ async def start_environment(connection, client, settings, request):
         for item in owned:
             if item.operation_id != env["current_operation_id"] or item.kind != "development":
                 await d.stop_and_remove_container(client, item.id, settings.stop_grace_seconds)
-        ex = dict(await q.get_exercise(connection, env["exercise_id"]))
-        ex["resources"] = await connection.fetch(
-            "SELECT file_path FROM exercise_resources WHERE exercise_id=$1", ex["id"]
-        )
+        ex = await q.get_exercise(connection, env["exercise_id"])
         key = await q.get_ssh_key(connection, env["user_id"])
         if not key:
             raise ValueError("SSH key missing")
-        workspace = await d.io_call(
-            prepare_development_workspace, settings, env["user_id"], ex, key
-        )
+        home = await d.io_call(prepare_development_home, settings, env["user_id"], ex["id"], key)
         container = await d.create_development_container(
             client,
             settings,
@@ -60,9 +55,8 @@ async def start_environment(connection, client, settings, request):
             ex["id"],
             env["current_operation_id"],
             ex["environment_image"],
-            workspace.directory,
-            ex["workspace_dir"],
-            workspace.authorized_key,
+            home.directory,
+            home.authorized_key,
         )
         async with transaction(connection):
             await lock_student_row(connection, env["user_id"])

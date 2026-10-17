@@ -17,6 +17,7 @@ def test_five_students_work_on_two_exercises(deployment, users):
             student, ssh = students[index], shells[index]
             output = "Hello C" if index % 2 == 0 else "incorrect"
             source = f'#include <stdio.h>\n#include <unistd.h>\nint main(void){{sleep(1);puts("{output}");}}\n'
+            ssh.run("mkdir hello-c")
             ssh.write("hello-c/main.c", source)
             ssh.write("hello-c/student.txt", student.email)
             assert ssh.run("id -u").strip() == "1000"
@@ -42,6 +43,7 @@ def test_five_students_work_on_two_exercises(deployment, users):
             assert student.report(student.submit())["is_success"]
             assert student.api.get("/exercises/hello-c").json()["is_completed"]
             ssh = student.start("sum-c")
+            ssh.run("mkdir sum-c")
             ssh.write("sum-c/sum.c", SUM)
             assert (
                 ssh.run(

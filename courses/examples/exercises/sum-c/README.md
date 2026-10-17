@@ -30,7 +30,8 @@ Output:
 ## Instructions
 
 1. Connect to your development environment over SSH.
-2. Create `sum.c` in `/home/student/sum-c`.
+2. Create the exercise directory with `mkdir -p ~/sum-c`, then create
+   `sum.c` inside it.
 3. Compile your program:
    ```sh
    cd ~/sum-c

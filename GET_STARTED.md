@@ -81,9 +81,25 @@ directory names must be unique. Removing a course folder does not delete its
 historical database records.
 
 PostgreSQL data lives in the Compose `database` volume. `DATA_ROOT` contains
-`workspaces/`, manager-owned SSH `keys/` and grading `snapshots/`. Back up both the
-volume and `DATA_ROOT`; archives are retained until an operator removes them.
+student `homes/`, manager-owned SSH `keys/` and grading `snapshots/`.
+Exercise folders live in `homes/<student-id>/<workspace_dir>`.
+Back up both the volume and `DATA_ROOT`; archives are retained until
+an operator removes them.
 The backend mounts snapshots read-only and has no Docker access.
+
+Each student has a writable `/home/student`, shared across their development
+exercises. Over SSH, edit `~/.vimrc`, `~/.bashrc`, `~/.bash_aliases` or files in
+`~/.config/`; run `source ~/.bashrc` to reload aliases in the current Bash session.
+Missing shell defaults are copied from the development image's `/etc/skel` as the
+student user without overwriting existing files. Personal settings survive stops,
+grading and the 12-hour container expiration. The home is the single writable
+student-data mount: all exercise folders remain accessible from any development
+environment, so students can organize their work and remove large files in one
+session. Students create their own exercise folders, for example
+`mkdir -p ~/hello-c`, and download any needed resources from the exercise page.
+The development container uses only the home. The manifest's `workspace_dir` is
+used only when grading, to validate and mount the submitted exercise folder;
+snapshots contain only that folder's contents.
 
 Inspect services with `docker compose logs -f backend container_manager`. Stop
 student environments before stopping the application services with
@@ -113,7 +129,8 @@ python3 -m venv .venv
 ```
 
 **The tests reset this deployment:** they stop its services, delete the database
-volume and clear managed workspaces, SSH keys and snapshots before running. They
-use the current `.env` and Compose file, then clean up again afterward. The suite
-includes five students working concurrently through SSH; the frontend is not run.
+volume and clear managed homes, SSH keys and snapshots before running.
+They use the current `.env` and Compose file, then clean up again afterward. The
+suite includes five students working concurrently through SSH; optional browser
+checks start a temporary frontend proxy.
 See [tests/README.md](tests/README.md) for requirements, groups and coverage.

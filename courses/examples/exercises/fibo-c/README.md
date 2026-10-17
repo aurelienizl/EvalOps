@@ -27,7 +27,8 @@ Output:
 ## Instructions
 
 1. Connect to your development environment over SSH.
-2. Create `fibo.c` in `/home/student/fibo-c`.
+2. Create the exercise directory with `mkdir -p ~/fibo-c`, then create
+   `fibo.c` inside it.
 3. Compile your program:
    ```sh
    cd ~/fibo-c

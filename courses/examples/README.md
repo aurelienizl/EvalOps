@@ -15,6 +15,11 @@ and a downloadable Markdown guide (`resources/guide.md`). Evaluators compile
 C11 submissions and write schema version 1 reports to `/result/result.json`.
 `WORKSPACE_DIR` and `RESULT_DIR` can override the default paths for local checks.
 
+Development entrypoints initialize shell defaults and start SSH without creating
+exercise folders. The container manager supplies SSH configuration and keys;
+standalone containers generate their own host keys. Development images keep the
+C build tools, while evaluators install only GCC and the C headers they need.
+
 ## Test suite
 
 From the repository root, install the test tools in a virtual environment:

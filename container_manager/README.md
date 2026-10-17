@@ -43,6 +43,12 @@ grading: it validates and mounts `homes/<user-id>/<workspace_dir>` read-only;
 snapshots include only that exercise
 folder. SSH remains available to repair an invalid exercise tree.
 
+Development images use their own `dev/entrypoint.sh` to prepare `/run/sshd`, copy
+missing shell defaults as the student and start SSH. The manager supplies the SSH
+configuration, authorized key and host key through read-only mounts. Images do not
+duplicate this configuration or contain generated host keys. Standalone containers
+generate their own host keys at startup; their health check reads the SSH PID file.
+
 ## Code layout
 
 | Path | Role |

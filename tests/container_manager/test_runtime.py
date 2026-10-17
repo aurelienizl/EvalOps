@@ -20,6 +20,23 @@ def test_catalog_readiness_and_single_instance(deployment):
     assert manager.status == "running"
 
 
+def test_course_development_image_variants_use_their_entrypoint(deployment, users):
+    student = users()
+    checked = set()
+    for exercise in deployment.db.rows("SELECT id,environment_image FROM exercises ORDER BY id"):
+        image = deployment.docker.images.get(exercise["environment_image"])
+        if image.id in checked:
+            continue
+        checked.add(image.id)
+        ssh = student.ssh(deployment.db.start(student.id, exercise["id"]))
+        container = deployment.containers(student.id, "development")[0]
+        assert container.attrs["Config"]["Entrypoint"] == ["/bin/sh", "/entrypoint.sh"]
+        assert container.attrs["HostConfig"]["ReadonlyRootfs"]
+        assert ssh.run("id -u").strip() == "1000"
+        ssh.run("test -s ~/.bashrc && test -s ~/.profile && test -w ~")
+        deployment.db.stop(student.id)
+
+
 def test_database_commands_ssh_persistence_and_crash_recovery(deployment, users):
     student, db = users(), deployment.db
     env = db.start(student.id, notify=False)  # Polling recovers a request without NOTIFY.

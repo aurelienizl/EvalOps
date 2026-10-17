@@ -142,13 +142,6 @@ async def create_development_container(
                         name=name,
                         labels=labels,
                         working_dir="/home/student",
-                        entrypoint=[
-                            "/bin/sh",
-                            "-c",
-                            "mkdir -p /run/sshd && "
-                            "su -s /bin/sh -c 'cp -Rn /etc/skel/. /home/student/' student && "
-                            "exec /usr/sbin/sshd -D -e -f /etc/ssh/sshd_config",
-                        ],
                         volumes={
                             str(home): {"bind": "/home/student", "mode": "rw"},
                             str(authorized_key): {

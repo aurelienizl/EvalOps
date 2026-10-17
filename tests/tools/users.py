@@ -11,7 +11,8 @@ from .wait import eventually
 
 PASSWORD = "evalops-development-test-password"
 HELLO = '#include <stdio.h>\nint main(void){puts("Hello C");}\n'
-SLOW_HELLO = '#include <stdio.h>\n#include <unistd.h>\nint main(void){sleep(2);puts("Hello C");}\n'
+# Keep grading observable without reaching the evaluator's two-second limit.
+SLOW_HELLO = '#include <stdio.h>\n#include <unistd.h>\nint main(void){sleep(1);puts("Hello C");}\n'
 HANG = "int main(void){for(;;){}}\n"
 SUM = '#include <stdio.h>\nint main(void){int a,b;if(scanf("%d %d",&a,&b)!=2)return 1;printf("%d\\n",a+b);}\n'
 

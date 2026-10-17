@@ -16,7 +16,7 @@ def test_five_students_work_on_two_exercises(deployment, users):
         def first_attempt(index):
             student, ssh = students[index], shells[index]
             output = "Hello C" if index % 2 == 0 else "incorrect"
-            source = f'#include <stdio.h>\n#include <unistd.h>\nint main(void){{sleep(2);puts("{output}");}}\n'
+            source = f'#include <stdio.h>\n#include <unistd.h>\nint main(void){{sleep(1);puts("{output}");}}\n'
             ssh.write("hello-c/main.c", source)
             ssh.write("hello-c/student.txt", student.email)
             assert ssh.run("id -u").strip() == "1000"

@@ -30,7 +30,7 @@ def load_settings() -> Settings:
         database_url,
         Path(os.environ.get("COURSES_ROOT", "courses")).resolve(),
         Path(os.environ.get("DATA_ROOT", "/var/lib/evalops")).resolve(),
-        os.environ.get("SSH_HOST", "localhost"),
+        ssh_host,
         host=os.environ.get("API_HOST", "0.0.0.0"),
         port=port,
         max_environments=maximum,

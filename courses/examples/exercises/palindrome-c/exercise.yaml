@@ -1,0 +1,11 @@
+id: palindrome-c
+name: Palindrome Check in C
+difficulty: medium
+workspace_dir: palindrome-c
+grade_timeout_seconds: 60
+max_evaluations: 3
+evaluation_window_minutes: 60
+resources:
+  - id: guide
+    name: Reference Guide
+    file: resources/guide.md

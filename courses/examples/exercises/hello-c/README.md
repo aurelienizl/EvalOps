@@ -1,23 +1,41 @@
 # First C Program
 
-## Objective
+## File Tree
 
-In this exercise, you will write your first program in C.
+```text
+hello-c/
+└── main.c (to submit)
+```
 
-## Working Directory
+## Goal
 
-Your workspace directory is:
-```bash
-/home/student/hello-c
+Print exactly `Hello C` followed by a newline. Do not read input or print
+anything else.
+
+## Example
+
+This program takes no input.
+
+Output:
+
+```text
+Hello C
 ```
 
 ## Instructions
 
-1. Connect via SSH to your development environment.
-2. Navigate to `/home/student/hello-c`:
-   ```bash
+1. Connect to your development environment over SSH.
+2. Create `main.c` in `/home/student/hello-c`.
+3. Compile your program:
+   ```sh
    cd ~/hello-c
+   gcc -std=c11 -Wall -Wextra main.c -o app
    ```
-3. Create a `main.c` file that prints exactly `Hello C` followed by a newline.
-4. Test compilation with `gcc -Wall main.c -o app` and run `./app`.
+4. Run `./app` and check the example above and the boundary cases in the
+   downloadable reference guide in **Resources**.
 5. Click **Evaluate** on the platform.
+
+The C standard library is allowed. Submit the source file; the evaluator builds
+its own executable. It checks compilation, a zero exit status, and exact standard
+output, including spaces and the final newline. Each execution has a two-second
+limit. You have three evaluations per 60-minute window.

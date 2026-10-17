@@ -1,0 +1,11 @@
+id: sort-c
+name: Sort Integers in C
+difficulty: medium
+workspace_dir: sort-c
+grade_timeout_seconds: 60
+max_evaluations: 3
+evaluation_window_minutes: 60
+resources:
+  - id: guide
+    name: Reference Guide
+    file: resources/guide.md

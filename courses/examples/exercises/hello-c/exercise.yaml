@@ -7,5 +7,5 @@ max_evaluations: 3
 evaluation_window_minutes: 60
 resources:
   - id: guide
-    name: C Reference Guide
-    file: resources/.gitkeep
+    name: Reference Guide
+    file: resources/guide.md

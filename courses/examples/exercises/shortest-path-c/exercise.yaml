@@ -1,0 +1,11 @@
+id: shortest-path-c
+name: Shortest Paths in C
+difficulty: hard
+workspace_dir: shortest-path-c
+grade_timeout_seconds: 60
+max_evaluations: 3
+evaluation_window_minutes: 60
+resources:
+  - id: guide
+    name: Reference Guide
+    file: resources/guide.md

@@ -7,6 +7,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY evaluate.py /app/evaluate.py
-RUN chmod +x /app/evaluate.py
 
 ENTRYPOINT ["python3", "/app/evaluate.py"]

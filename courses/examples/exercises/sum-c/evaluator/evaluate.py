@@ -1,84 +1,121 @@
 #!/usr/bin/env python3
+"""Compile the submission and report each case using EvalOps schema version 1."""
+
 import json
 import os
 import subprocess
 from pathlib import Path
+from tempfile import TemporaryDirectory
+
+SOURCE_FILE = "sum.c"
+WORKSPACE_NAME = "sum-c"
+COMPILE_TIMEOUT_SECONDS = 10
+RUN_TIMEOUT_SECONDS = 2
+
+CASES = [
+    ("positive", "Positive integers", "2 3\n", "5\n"),
+    ("mixed", "Mixed signs", "-4 7\n", "3\n"),
+    ("negative", "Two negative integers", "-5 -8\n", "-13\n"),
+    ("zero", "Two zeroes", "0 0\n", "0\n"),
+    ("cancel", "Opposite integers", "42 -42\n", "0\n"),
+    ("identity", "Adding zero", "0 -19\n", "-19\n"),
+    ("upper_bound", "Largest sum", "1000000000 1000000000\n", "2000000000\n"),
+    ("lower_bound", "Smallest sum", "-1000000000 -1000000000\n", "-2000000000\n"),
+    ("whitespace", "Mixed whitespace and EOF", " \t12\n-7", "5\n"),
+]
 
 
 def evaluate(workspace_dir: Path) -> dict:
-    source_file = workspace_dir / "sum.c"
-    binary_path = Path("/tmp/sum")
-    file_exists = source_file.is_file()
-    tests = [{
-        "id": "file_exists",
-        "name": "Source file sum.c exists",
-        "passed": file_exists,
-        "message": None if file_exists else "Source file sum.c is missing",
-    }]
+    workspace_dir = workspace_dir.resolve()
+    source = workspace_dir / SOURCE_FILE
+    exists = source.is_file()
+    tests = [
+        {
+            "id": "file_exists",
+            "name": f"Source file {SOURCE_FILE} exists",
+            "passed": exists,
+            "message": None if exists else f"Source file {SOURCE_FILE} is missing",
+        }
+    ]
 
-    compiled = False
-    message = "Source file sum.c is missing"
-    if file_exists:
-        try:
-            result = subprocess.run(
-                ["gcc", "-Wall", "-Wextra", str(source_file), "-o", str(binary_path)],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-            compiled = result.returncode == 0
-            message = None if compiled else result.stderr.strip()
-        except (OSError, subprocess.TimeoutExpired) as error:
-            message = f"Compilation failed: {error}"
-    tests.append({
-        "id": "compilation",
-        "name": "Compile sum.c with gcc",
-        "passed": compiled,
-        "message": message,
-    })
-
-    correct_output = False
-    message = "Compilation not successful"
-    if compiled:
-        correct_output = True
-        message = None
-        for input_text, expected in [("2 3\n", "5"), ("-4 7\n", "3"), ("0 0\n", "0")]:
+    # Never compile into the read-only student workspace or reuse an old binary.
+    with TemporaryDirectory(prefix="evalops-c-") as directory:
+        binary = Path(directory) / "submission"
+        compiled = False
+        message = f"Source file {SOURCE_FILE} is missing"
+        if exists:
             try:
                 result = subprocess.run(
-                    [str(binary_path)],
-                    input=input_text,
+                    ["gcc", "-std=c11", "-Wall", "-Wextra", str(source), "-o", str(binary)],
                     capture_output=True,
                     text=True,
-                    timeout=5,
+                    encoding="utf-8",
+                    errors="replace",
+                    cwd=workspace_dir,
+                    timeout=COMPILE_TIMEOUT_SECONDS,
                 )
-                actual = result.stdout.strip()
-                if result.returncode != 0 or actual != expected:
-                    correct_output = False
-                    message = (
-                        f"Input {input_text.strip()!r}: expected {expected!r}, "
-                        f"got {actual!r} (exit code {result.returncode})"
+                compiled = result.returncode == 0
+                message = None if compiled else result.stderr[:2000].replace("\x00", "\\x00")
+            except subprocess.TimeoutExpired:
+                message = "Compilation timed out"
+            except OSError as error:
+                message = f"Compilation failed: {error}"
+        tests.append(
+            {
+                "id": "compilation",
+                "name": f"Compile {SOURCE_FILE} with gcc",
+                "passed": compiled,
+                "message": message,
+            }
+        )
+
+        for case_id, name, stdin, expected in CASES:
+            passed = False
+            message = "Compilation not successful"
+            return_code = None
+            if compiled:
+                try:
+                    result = subprocess.run(
+                        [str(binary)],
+                        input=stdin.encode("utf-8"),
+                        capture_output=True,
+                        cwd=workspace_dir,
+                        timeout=RUN_TIMEOUT_SECONDS,
                     )
-                    break
-            except (OSError, subprocess.TimeoutExpired, UnicodeError) as error:
-                correct_output = False
-                message = f"Execution failed: {error}"
-                break
-    tests.append({
-        "id": "correct_output",
-        "name": "Correct sums for positive, negative, and zero inputs",
-        "passed": correct_output,
-        "message": message,
-    })
+                    stdout = result.stdout.decode("utf-8", errors="replace")
+                    return_code = result.returncode
+                    passed = return_code == 0 and stdout == expected
+                    message = (
+                        None
+                        if passed
+                        else (
+                            f"Expected stdout {expected!r}; got {stdout[:1000]!r} "
+                            f"(exit code {return_code})"
+                        )
+                    )
+                except subprocess.TimeoutExpired:
+                    message = f"Execution timed out after {RUN_TIMEOUT_SECONDS} seconds"
+                except OSError as error:
+                    message = f"Execution failed: {error}"
+            tests.append(
+                {
+                    "id": case_id,
+                    "name": name,
+                    "passed": passed,
+                    "message": message,
+                    "return_code": return_code,
+                }
+            )
     return {"schema_version": 1, "tests": tests}
 
 
 def main():
-    workspace_dir = Path(os.environ.get("WORKSPACE_DIR", "/home/student/sum-c"))
-    result_dir = Path("/result")
+    workspace = Path(os.environ.get("WORKSPACE_DIR", f"/home/student/{WORKSPACE_NAME}"))
+    result_dir = Path(os.environ.get("RESULT_DIR", "/result"))
     result_dir.mkdir(parents=True, exist_ok=True)
-    temporary_file = result_dir / "result.json.tmp"
-    temporary_file.write_text(json.dumps(evaluate(workspace_dir)), encoding="utf-8")
-    temporary_file.replace(result_dir / "result.json")
+    temporary = result_dir / "result.json.tmp"
+    temporary.write_text(json.dumps(evaluate(workspace), indent=2), encoding="utf-8")
+    temporary.replace(result_dir / "result.json")
 
 
 if __name__ == "__main__":

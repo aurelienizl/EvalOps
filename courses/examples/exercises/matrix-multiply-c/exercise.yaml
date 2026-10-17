@@ -1,0 +1,11 @@
+id: matrix-multiply-c
+name: Matrix Multiplication in C
+difficulty: hard
+workspace_dir: matrix-multiply-c
+grade_timeout_seconds: 60
+max_evaluations: 3
+evaluation_window_minutes: 60
+resources:
+  - id: guide
+    name: Reference Guide
+    file: resources/guide.md

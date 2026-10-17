@@ -1,11 +1,11 @@
 id: fibo-c
-name: Fibonacci in C
+name: Fibonacci Sequence in C
 difficulty: easy
 workspace_dir: fibo-c
 grade_timeout_seconds: 60
 max_evaluations: 3
 evaluation_window_minutes: 60
 resources:
-  - id: gitkeep
-    name: Instructions
-    file: resources/.gitkeep
+  - id: guide
+    name: Reference Guide
+    file: resources/guide.md

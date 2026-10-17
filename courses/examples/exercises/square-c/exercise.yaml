@@ -1,0 +1,11 @@
+id: square-c
+name: Square an Integer in C
+difficulty: warmup
+workspace_dir: square-c
+grade_timeout_seconds: 60
+max_evaluations: 3
+evaluation_window_minutes: 60
+resources:
+  - id: guide
+    name: Reference Guide
+    file: resources/guide.md

@@ -5,6 +5,20 @@ handle the UI; there is no framework, build step or npm installation required.
 Nginx forwards API requests to the backend on the same origin, using its session
 cookie for authentication.
 
+The production proxy caps API traffic at 100 requests/second for the whole app,
+with an immediate burst allowance of 100 excess requests. Login and password
+changes share a stricter cap of two requests/second, queuing up to 20 excess
+requests (about ten seconds). Excess traffic receives HTTP 429 with a JSON
+message and `Retry-After: 1`. Backend quota responses keep their own retry headers.
+Static assets, documentation and health checks do not consume these allowances.
+
+These limits are shared by all students, including clients behind Nginx Proxy
+Manager. Forwarded IP headers are not trusted by default. Per-client throttling
+requires configuring the frontend to trust only the actual proxy address and
+adding limits keyed by the restored client address; per-account login protection
+belongs in the backend. Tune the shared caps for your class size and server.
+After editing `nginx.conf`, rebuild with `docker compose up -d --build frontend`.
+
 ## Screens and behavior
 
 - Course cards, exercise subjects, resources and evaluation history.

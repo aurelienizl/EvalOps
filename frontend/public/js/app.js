@@ -1,9 +1,10 @@
 import { api, escape as e, id, button, tag } from "./api.js";
 import * as views from "./views.js";
+import * as admin from "./admin.js";
 
 const $ = (selector) => document.querySelector(selector);
 const main = $("#main"), banner = $("#runtime-banner"), dialog = $("#report-dialog");
-let user, environment, busy = false, reading, page, reportData, reportController, tick = 0;
+let user, environment, busy = false, reading, page, reportData, reportController, reportIsAdmin = false, tick = 0;
 const locked = () => busy || !environment || environment.locked;
 
 function notify(message) {
@@ -20,25 +21,22 @@ function fail(error) {
 }
 function signIn() { location.hash = "login"; location.reload(); }
 function closeReport() { reportController?.abort(); reportData = null; dialog.close(); }
-async function openReport(value) {
+async function openReport(value, teacher = false) {
   closeReport();
+  reportIsAdmin = teacher;
   dialog.showModal();
   $("#report-body").textContent = "Loading evaluation…";
   reportController = new AbortController();
-  if (typeof value === "object") {
-    $("#report-body").innerHTML = views.report(value);
-  } else {
-    reportData = { id: value, status: "running" };
-    await refreshReport();
-  }
+  reportData = { id: value, status: "running" };
+  await refreshReport();
 }
 async function refreshReport() {
   const controller = reportController;
   try {
-    const data = await api(`/evaluations/${id(reportData.id)}`, { signal: controller.signal });
+    const data = await api(`${reportIsAdmin ? "/admin" : ""}/evaluations/${id(reportData.id)}`, { signal: controller.signal });
     if (!controller.signal.aborted) {
       reportData = data;
-      $("#report-body").innerHTML = views.report(data);
+      $("#report-body").innerHTML = views.report(data, { teacher: reportIsAdmin });
     }
   } catch (error) { fail(error); }
 }
@@ -96,15 +94,9 @@ async function refreshPage(current = page) {
       $("#history").innerHTML = views.history(history, current.key);
       updateControls();
     } else if (current.name === "admin") {
-      const query = new URLSearchParams(current.query);
-      query.set("limit", current.key === "overview" ? 5 : 25);
-      const [stats, rows] = await Promise.all([read("/admin/stats"), read(`/admin/${current.key === "evaluations" ? "evaluations" : "environments"}?${query}`)]);
-      if (current.controller.signal.aborted) return;
-      current.rows = rows.items;
-      $("#admin-stats").innerHTML = views.adminStats(stats);
-      $("#admin-panel").innerHTML = views.adminTable(rows, current.key, current.query);
+      await admin.refresh(current);
     }
-  } catch (error) { fail(error); }
+  } catch (error) { if (current.name === "admin" && !current.controller.signal.aborted) admin.showError(error); fail(error); }
   finally { current.refreshing = false; }
 }
 
@@ -128,7 +120,7 @@ async function route() {
     } else if (name === "profile") html = views.profile(user);
     else if (name === "admin" && user.role === "admin") {
       current.key = ["overview", "environments", "evaluations"].includes(key) ? key : "overview";
-      html = views.admin(current.key, query);
+      html = admin.shell(current.key, query);
     } else { location.hash = "courses"; return; }
     if (current.controller.signal.aborted) return;
     main.innerHTML = html;
@@ -136,7 +128,7 @@ async function route() {
       link.target = "_blank"; link.rel = "noopener noreferrer";
     });
     current.ready = true;
-    document.title = `${current.exercise?.name || ({ profile: "Profile & Settings", admin: "Platform Administration" }[name]) || (user ? "DevOps Modules" : "Sign in")} — EvalOps`;
+    document.title = `${current.exercise?.name || ({ profile: "Profile & Settings", admin: "Teaching dashboard" }[name]) || (user ? "DevOps Modules" : "Sign in")} — EvalOps`;
     document.querySelectorAll("[data-nav]").forEach((a) => a.toggleAttribute("aria-current", a.dataset.nav === (name === "exercises" ? "courses" : name)));
     updateControls();
     await refreshPage(current);
@@ -173,14 +165,10 @@ document.addEventListener("click", async (event) => {
       try { await navigator.clipboard.writeText(code.textContent); notify("SSH command copied."); }
       catch { window.getSelection().selectAllChildren(code); notify("Copy the highlighted command."); }
     } else if (action === "report") await openReport(value);
-    else if (action === "summary") await openReport(page.rows.find((x) => x.id === value));
+    else if (action === "admin-report") await openReport(value, true);
+    else if (action.startsWith("admin-") && page?.name === "admin") await admin.handleClick(action, value, page);
     else if (action === "refresh") { if (page.ready) await refreshPage(); else await route(); }
-    else if (action === "clear") {
-      target.disabled = true;
-      await api(`/admin/environments/${id(value)}/clear`, { method: "POST" });
-      notify("Stop requested. Files will be preserved.");
-      await refreshPage();
-    }
+
   } catch (error) { target.disabled = false; fail(error); }
 });
 
@@ -189,9 +177,8 @@ document.addEventListener("submit", async (event) => {
   if (!form.dataset.form) return;
   event.preventDefault();
   const values = Object.fromEntries(new FormData(form)), kind = form.dataset.form;
-  if (kind === "filters") {
-    const query = new URLSearchParams(Object.entries(values).filter(([, value]) => value.trim()));
-    location.hash = `admin/evaluations?${query}`;
+  if (kind === "admin-filters") {
+    admin.applyFilters(values, page);
     return;
   }
   if (busy || form.querySelector("button").disabled) return;
@@ -223,6 +210,11 @@ async function poll() {
   }
   setTimeout(poll, 2000);
 }
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !dialog.open && page?.name === "admin" && page.query.has("student")) {
+    admin.handleClick("admin-close-student", "", page).catch(fail);
+  }
+});
 $("#report-close").onclick = closeReport;
 $(".skip-link").onclick = (event) => { event.preventDefault(); main.focus(); };
 dialog.addEventListener("close", () => { reportController?.abort(); reportData = null; });

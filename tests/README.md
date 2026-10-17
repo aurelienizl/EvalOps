@@ -2,7 +2,8 @@
 
 Real integration tests for the backend and container manager. Every test run
 uses the repository's `compose.yaml` and current Compose environment (`.env` and
-shell variables). No alternate Compose file, database or frontend is launched.
+shell variables). The optional browser checks also start a temporary local
+frontend proxy. All suites use the same Compose file and database.
 
 **Development use only:** before running, the suite stops the current Compose
 project, removes its database volume and managed containers/networks, and deletes
@@ -33,6 +34,7 @@ starts with the same full reset. Run suites sequentially against this deployment
 | `backend/` | Real API authentication, catalog/resources, permissions, start/stop and grading races, quotas, deadlines, reports and admin cleanup |
 | `container_manager/` | Running manager: catalog loading, instance guard, database requests, SSH, persistence, crash recovery, grading timeout and interrupted grading |
 | `functional/` | Five concurrent students compile over SSH, submit passing/failing work, inspect snapshots, fix and resubmit, then complete a second exercise |
+| `frontend/` | Optional Chromium checks for teacher search, progress, reports, refresh stability, mobile layout, workspace stopping and student access restrictions |
 | `tools/` | Shared deployment reset, SQL requests, HTTP client, `SshClient`, user setup and bounded polling |
 
 One session fixture starts PostgreSQL, the manager and backend with the existing
@@ -44,3 +46,13 @@ backend configured with `COOKIE_SECURE=true` without starting a TLS/frontend pro
 Manager tests enqueue requests in PostgreSQL. Backend and functional tests submit
 requests through HTTP. Actions finish in the real manager; tests do not call its
 Python handlers or mock Docker. Small C examples are shared in `tools/users.py`.
+
+## Browser checks
+
+Install `tests/frontend/requirements.txt` and run
+`.venv/bin/python -m playwright install chromium` to enable the Chromium tests.
+Without Playwright, this group is skipped. Run `pytest tests/frontend` against a
+development deployment with the same reset precautions described above.
+The tests start a temporary local frontend proxy and authenticate with real API
+sessions. Pure UI result/filter rules can also be checked without Docker using
+`npm test --prefix frontend`.

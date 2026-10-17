@@ -10,12 +10,15 @@ manager; the backend never calls Docker or the manager directly.
 - Serve courses, exercise subjects, resources, evaluation reports and snapshots.
 - Admit start, stop and grading requests in short transactions under a student lock.
 - Enforce one development environment per student, deadlines and evaluation quotas.
-- Provide admin metrics, operation monitoring and cleanup requests.
+- Provide teacher student summaries, filtered submissions, full reports, runtime
+  monitoring and cleanup requests using the existing tables.
 
 Grading requires a `running` environment for the requested exercise. Invalid
 submissions return 409 without creating an evaluation or consuming quota.
 Accepted operations return a polling URL; controls remain locked during transitions
-and grading. Reports and snapshots are accessible only to their owner.
+and grading. Students can read their own reports and snapshots. Administrators can also read
+full reports through the role-protected admin routes; snapshot downloads remain
+restricted to their owner.
 
 ## Code layout
 

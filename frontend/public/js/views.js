@@ -1,10 +1,10 @@
 import { escape as e, id, date, button, tag, heading, card, field, download, pager } from "./api.js";
+import { outcomes, outcome } from "./admin-data.js";
 import { marked } from "../vendor/marked.js";
 const { DOMPurify } = window;
 
 const empty = (text) => `<p class="empty-message">${text}</p>`;
 const difficulties = { warmup: "WARM-UP // GETTING STARTED", easy: "LEVEL // EASY", medium: "LEVEL // MEDIUM", hard: "LEVEL // HARD" };
-const auditLink = (key, value, label) => `<a href="#admin/evaluations?${e(new URLSearchParams({ [key]: value }))}" title="${e(value)}">${e(label)}</a>`;
 function duration(milliseconds) {
   const seconds = Math.max(0, Math.floor(milliseconds / 1000)), minutes = Math.floor(seconds / 60);
   return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : minutes ? `${minutes}m ${seconds % 60}s` : `${seconds}s`;
@@ -78,61 +78,20 @@ export function profile(user) {
       <button class="btn btn-secondary">Update password</button></form>`)}</div>`;
 }
 
-export function report(data) {
-  return `<div class="report-summary">${tag(data.status, data.is_success)}<code>${e(data.id)}</code>
-    <p>${e(data.email)} ${e(data.exercise_id)} · ${e(date(data.created_at))}</p>
+export function report(data, { teacher = false } = {}) {
+  const [label, tone] = outcomes[outcome(data)];
+  const result = teacher ? `<span class="teacher-badge teacher-badge-${tone}">${label}</span>` : tag(data.status, data.is_success);
+  return `<div class="report-summary">${result}<code>${e(data.id)}</code>
+    <p>${e(data.email)} ${e(data.exercise_name || data.exercise_id)} · ${e(date(data.created_at))}</p>
     ${data.user_id ? `<p>Student ID: <code>${e(data.user_id)}</code></p>` : ""}
     <p>Finished: ${e(date(data.finished_at))} · Elapsed since submission: ${evaluationTime(data)}</p></div>
     ${data.status === "running" && !data.finished_at ? '<p class="alert">Evaluation in progress. Environment controls remain locked until cleanup finishes.</p>' : ""}
     ${data.error_message ? `<p class="alert alert-error">${e(data.error_message)}</p>` : ""}
     ${data.error_code ? `<p class="mono">${e(data.error_code)}</p>` : ""}
     ${data.total_tests != null ? `<h3 class="report-score">${data.passed_tests ?? 0} / ${data.total_tests} TESTS PASSED</h3>` : ""}
-    ${data.snapshot_available ? download(`/api/v1/evaluations/${id(data.id)}/snapshot`, "↓ Download submitted workspace") : ""}
+    ${data.snapshot_available && !teacher ? download(`/api/v1/evaluations/${id(data.id)}/snapshot`, "↓ Download submitted workspace") : ""}
     <div class="report-tests">${(data.tests || []).map((t) => `<details class="test-result ${e(t.status)}" ${t.status !== "passed" ? "open" : ""}>
       <summary><span>${e(t.name)}</span>${tag(t.status)}</summary><p>Exit code: ${e(t.return_code ?? "—")} · ${e(t.execution_time_ms ?? "—")} ms</p>
       ${t.stdout_diff ? `<h4>Output</h4><pre class="diff">${e(t.stdout_diff)}</pre>` : ""}
       ${t.stderr_diff ? `<h4>Diagnostics</h4><pre class="diff">${e(t.stderr_diff)}</pre>` : ""}</details>`).join("")}</div>`;
-}
-
-export function admin(tab, query) {
-  return `<div class="admin-header">${heading("ADMINISTRATION // CONTROL PANEL", "Platform Administration", "Monitor development environments and audit evaluations.")}
-    ${button("Refresh", "refresh")}</div><nav class="admin-tabs" aria-label="Administration sections">
-    ${[["overview", "Overview & Metrics"], ["environments", "Active Operations"], ["evaluations", "Audit Logs"]].map(([key, label]) =>
-      `<a class="admin-tab" href="#admin/${key}" ${tab === key ? 'aria-current="page"' : ""}>${label}</a>`).join("")}</nav>
-    <div id="admin-stats" class="admin-stats-grid"></div>
-    ${tab === "evaluations" ? `<form class="admin-filters" data-form="filters">
-      <label>Student ID<input name="user_id" value="${e(query.get("user_id"))}" placeholder="Student UUID"></label>
-      <label>Exercise<input name="exercise_id" value="${e(query.get("exercise_id"))}" placeholder="Exercise ID"></label>
-      <label>Status<select name="status">${["", "running", "completed", "failed", "timeout"].map((s) =>
-        `<option value="${s}" ${s === query.get("status") ? "selected" : ""}>${s || "All statuses"}</option>`).join("")}</select></label>
-      <button class="btn btn-secondary">Apply filters</button></form>` : ""}
-    <div id="admin-panel">Loading operations…</div>`;
-}
-
-export function adminStats(data) {
-  const finished = data.evaluations - data.pending_evaluations;
-  return [["USERS", data.users, "Total accounts"], ["EVALUATIONS", data.evaluations, "Total submissions"],
-    ["RUNTIMES", data.active_environments, "Active environments and operations"],
-    ["PENDING", auditLink("status", "running", data.pending_evaluations), "Queued or grading · view logs"],
-    ["PASSED", data.successful_evaluations, "Successful evaluations"],
-    ["SUCCESS RATE", finished > 0 ? `${Math.round(data.successful_evaluations / finished * 100)}%` : "—", "Among finished evaluations"]]
-    .map(([label, value, description]) => `<div class="card stat-card"><p class="card-system-tag">METRICS // ${label}</p><strong class="stat-value">${value}</strong>
-      <span class="text-muted">${description}</span></div>`).join("");
-}
-
-export function adminTable(data, tab, query) {
-  const logs = tab === "evaluations";
-  const columns = logs ? ["Evaluation", "Student", "Exercise", "Result", "Timing", "Details"] : ["Student", "Exercise", "State", "SSH port", "Expires", "Actions"];
-  return card(logs ? "EVALUATIONS // AUDIT LOG" : "RUNTIMES // ACTIVE OPERATIONS", `<div class="table-responsive"><table>
-    <thead><tr>${columns.map((c) => `<th scope="col">${c}</th>`).join("")}</tr></thead><tbody>${data.items.map((x) => `<tr>
-      ${logs ? `<td><code title="${e(x.id)}">${e(x.id.slice(0, 8))}</code></td>` : ""}<td>${auditLink("user_id", x.user_id, x.email)}</td><td>${auditLink("exercise_id", x.exercise_id, x.exercise_id)}</td><td>${tag(x.status, x.is_success)}
-      ${logs ? (x.error_code || x.error_message ? `<small class="text-error">${e([x.error_code, x.error_message].filter(Boolean).join(": "))}</small>` : "") :
-        `<small title="Last state update: ${e(date(x.last_activity_at))}">Updated ${duration(Date.now() - new Date(x.last_activity_at))} ago</small>
-        <details class="operation-details"><summary>Operation details</summary>Student: <code>${e(x.user_id)}</code><br>Operation: <code>${e(x.current_operation_id || "—")}</code></details>`}</td>
-      ${logs ? `<td>Submitted ${e(date(x.created_at))}<small>Finished ${e(date(x.finished_at))}</small><small>Elapsed ${evaluationTime(x)}${x.finished_at ? "" : " · in progress"}</small></td><td>${button("Details", "summary", x.id)}</td>` :
-        `<td>${e(x.ssh_port ?? "—")}</td><td>${e(date(x.expires_at))}<small>${x.expires_at ? new Date(x.expires_at) <= new Date() ? "Expired · awaiting cleanup" : `${duration(new Date(x.expires_at) - Date.now())} remaining` : "No expiration set"}</small></td><td><button class="btn btn-danger" data-action="clear" data-value="${e(x.user_id)}" ${x.status !== "running" ? "disabled" : ""}>Stop environment</button></td>`}
-    </tr>`).join("") || `<tr><td colspan="6">No records found.</td></tr>`}</tbody></table></div>`) + (tab === "overview" ? "" : pager(data, (offset) => {
-      const next = new URLSearchParams(query); next.set("offset", offset);
-      return `#admin/${tab}?${next}`;
-    }));
 }

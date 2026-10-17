@@ -77,6 +77,12 @@ async def get_evaluation(evaluation_id: UUID, pool: Database, user: User):
     )
     if row is None:
         raise HTTPException(404, "Evaluation not found")
+    return await evaluation_report(pool, row)
+
+
+async def evaluation_report(pool, row):
+    """Shared serialization after the caller has checked report access."""
+    evaluation_id = row["id"]
     data = dict(row)
     data["snapshot_available"] = bool(data.pop("snapshot_archive_path"))
     tests = await pool.fetch(
